@@ -27,7 +27,7 @@
     var bp = REF.bloodprep || {};
     var surgeries = bp.surgeries || [], antigens = bp.antigens || [],
         hgbBands = bp.hgb_bands || [], races = bp.races || [];
-    var state = { surgery_id: "", hgb: "", race: "other", antibodies: {}, surgQ: "", surgDiv: "" };
+    var state = { surgery_id: "", hgb: "", race: "other", recipient_abo: "", antibodies: {}, surgQ: "", surgDiv: "" };
 
     function normDiv(s) { s = (s || "").trim(); return /^cardio/i.test(s) ? "Cardiac" : s; }
     var divisions = {};
@@ -42,7 +42,7 @@
 
     var run = debounce(function () {
       var r = ENG.bloodprepCompute({ surgery_id: state.surgery_id, hgb: state.hgb, race: state.race,
-        antibodies: Object.keys(state.antibodies) });
+        recipient_abo: state.recipient_abo, antibodies: Object.keys(state.antibodies) });
       renderResult(r);
     }, 60);
 
@@ -101,6 +101,8 @@
     var ctxCard = el("div", { class: "surface ref-card" }, el("h4", {}, "Patient context"));
     ctxCard.appendChild(field("Most recent hemoglobin", seg(hgbBands.map(function (h) { return { value: h.value, label: h.label }; }), state.hgb, function (v) { state.hgb = v; run(); })));
     ctxCard.appendChild(field("Race / ethnicity (for antigen-negative frequency)", seg(races.map(function (r) { return { value: r.value, label: r.label }; }), state.race, function (v) { state.race = v; run(); })));
+    var aboGroups = (REF.abo && REF.abo.groups) || [{ value: "", label: "Unknown" }];
+    ctxCard.appendChild(field("Recipient ABO group (for ABO-compatible donor pool)", seg(aboGroups.map(function (g) { return { value: g.value, label: g.label }; }), state.recipient_abo, function (v) { state.recipient_abo = v; run(); }), "Antigen-negative frequency is ABO-independent; this shrinks the random-donor pool only."));
     controls.appendChild(ctxCard);
 
     /* --- antibodies --- */
@@ -130,8 +132,10 @@
       result.appendChild(el("div", { class: "bp-headline " + sev }, r.approach));
       if (r.units_to_prepare > 0) {
         var stats = el("div", { class: "bp-stats" });
-        [["Units to prepare", r.units_to_prepare], ["Units to screen", r.units_to_screen == null ? "—" : r.units_to_screen],
-         ["Compatible donors", r.combined_compatible_pct + "%"]].forEach(function (p) {
+        var items = [["Units to prepare", r.units_to_prepare], ["Antigen-neg to screen", r.units_to_screen == null ? "—" : r.units_to_screen]];
+        if (r.donors_to_reach != null) items.push(["Random donors to reach", r.donors_to_reach]);
+        items.push(["Antigen-neg freq", r.combined_compatible_pct + "%"]);
+        items.forEach(function (p) {
           stats.appendChild(el("div", { class: "bp-stat" }, el("strong", {}, String(p[1])), el("span", {}, p[0])));
         });
         result.appendChild(stats);

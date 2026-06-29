@@ -218,6 +218,22 @@
     return vals.length ? Math.min.apply(null, vals) : 1.0;
   }
 
+  // Fraction of donors that are ABO-compatible with the recipient (race-stratified).
+  // Antigen-negative frequency is ABO-independent, so this multiplies the donor pool
+  // only — it does not change the antigen-negative % or the crossmatch count.
+  function aboCompatFraction(recip, race) {
+    if (!recip) return 1.0;
+    var d = (window.ERICREF && window.ERICREF.abo) || null;
+    if (!d) return 1.0;
+    var compat = (d.compatible || {})[recip];
+    if (!compat) return 1.0;
+    var prev = d.prevalence || {};
+    function fracFor(t) { var s = 0; compat.forEach(function (g) { s += Number(t[g] || 0); }); return s; }
+    if (race in prev) return fracFor(prev[race]);
+    var vals = Object.keys(prev).map(function (k) { return fracFor(prev[k]); });
+    return vals.length ? Math.min.apply(null, vals) : 1.0;
+  }
+
   var HGB_RULES = {
     ge10:  [0, 0, "Hemoglobin ≥10 g/dL — transfusion unlikely for most procedures."],
     "8to10": [0, 0, "Hemoglobin 8–9.9 g/dL — transfusion possible; keep a current type & screen."],
@@ -235,6 +251,7 @@
     var surgeryId = sel.surgery_id || "";
     var hgb = sel.hgb || "";
     var race = sel.race || "other";
+    var recipientAbo = sel.recipient_abo || "";
     var antibodyCodes = (sel.antibodies || []).map(String);
 
     var surgeries = surgeryIndex();
@@ -284,7 +301,7 @@
       caveats.push(nm + ": usually not clinically significant — antigen-negative units are generally not required unless reactive at 37 °C / AHG. Confirm clinical significance.");
     }
 
-    var unitsToPrepare, combinedPct, unitsToScreen;
+    var unitsToPrepare, combinedPct, unitsToScreen, donorsToReach = null, aboCompatPct = null;
     if (significant.length) {
       var antigens = significant.map(function (a) { return a.name.replace("Anti-", ""); }).join(", ");
       unitsToPrepare = Math.max(units, 2);
@@ -301,6 +318,15 @@
       }
       if (unitsToScreen !== null) recommendations.push("Expect to screen ~" + unitsToScreen + " donor unit(s) to find " + unitsToPrepare + " compatible (combined antigen-negative frequency ~" + fmtPct(combinedPct) + ").");
       else flags.push("No compatible donors by these frequencies — reference lab / rare-donor program required.");
+      // ABO: units must also be ABO-compatible. Shrinks the random-donor pool only.
+      var aboFrac = aboCompatFraction(recipientAbo, race);
+      if (recipientAbo && aboFrac > 0 && aboFrac < 1) {
+        aboCompatPct = Math.round(aboFrac * 1000) / 10;
+        if (combinedFreq > 0) donorsToReach = Math.ceil(unitsToPrepare / (combinedFreq * aboFrac));
+        findings.push("Recipient group " + recipientAbo + ": only ~" + fmtPct(aboFrac * 100) +
+          " of donors are ABO-compatible — expect to reach ~" + (donorsToReach != null ? donorsToReach : "many") +
+          " random donors to find " + unitsToPrepare + " unit(s) that are both ABO-compatible and antigen-negative.");
+      }
       if (significant.some(function (a) { return a.high_incidence; }) || combinedPct < 5)
         flags.push("VERY rare compatibility (high-incidence antigen or <5% compatible) — involve the blood bank reference lab and rare-donor registry; allow significant lead time; consider autologous/family units.");
       else if (combinedPct < 15)
@@ -316,6 +342,7 @@
     var summary = {
       approach: approach, units_to_prepare: unitsToPrepare, units_to_screen: unitsToScreen,
       combined_compatible_pct: Math.round(combinedPct * 10) / 10,
+      recipient_abo: recipientAbo, abo_compatible_pct: aboCompatPct, donors_to_reach: donorsToReach,
       antibodies: perAntibody, findings: findings, recommendations: recommendations,
       caveats: caveats, flags: flags
     };
@@ -329,6 +356,7 @@
     if (surgery) ctx.push("Surgery: " + surgery.name);
     if (hgb) { var labels = { ge10: "≥10", "8to10": "8–9.9", "7to8": "7–7.9", lt7: "<7" }; ctx.push("Hemoglobin: " + (labels[hgb] || hgb) + " g/dL"); }
     ctx.push("Race/ethnicity: " + race);
+    if (s.recipient_abo) ctx.push("Recipient ABO: " + s.recipient_abo + (s.abo_compatible_pct != null ? " (~" + s.abo_compatible_pct + "% of donors ABO-compatible)" : ""));
     if (ctx.length) { lines.push("CONTEXT"); ctx.forEach(function (c) { lines.push("  • " + c); }); lines.push(""); }
     lines.push("RECOMMENDATION"); lines.push("  • " + s.approach);
     s.recommendations.forEach(function (r) { lines.push("  • " + r); });
@@ -341,6 +369,7 @@
       });
       lines.push("");
     }
+    if (s.donors_to_reach != null) { lines.push("ABO-COMPATIBLE DONOR POOL"); lines.push("  • Recipient group " + s.recipient_abo + ": ~" + s.abo_compatible_pct + "% of donors ABO-compatible → expect to reach ~" + s.donors_to_reach + " random donors for " + s.units_to_prepare + " ABO-compatible antigen-negative unit(s)."); lines.push(""); }
     if (s.flags.length) { lines.push("FLAGS"); s.flags.forEach(function (f) { lines.push("  • " + f); }); lines.push(""); }
     if (s.caveats.length) { lines.push("NOTES"); s.caveats.forEach(function (c) { lines.push("  • " + c); }); lines.push(""); }
     lines.push("Decision support only. MSBOS is institution-specific; antigen frequencies are population estimates. The pathologist / blood bank remains the final decision-maker.");
