@@ -20,7 +20,7 @@ The decision logic is **ported, not re-derived**: the panel interpreter (`interp
 
 ## ⚠️ Privacy & scope
 
-- **Private by design.** This repo embeds **internal Henry Ford clinical content** — the institutional MSBOS (policy `PCR-PALM-TRM-5.050`) and approval logic. Keep the repository **private**; do not make it or its Pages site public.
+- **Published at the maintainer's direction.** This repo embeds **internal Henry Ford clinical content** — the institutional MSBOS (policy `PCR-PALM-TRM-5.050`) and approval logic — and is published publicly by the author's explicit choice. It is institutional clinical-reference material (not PHI). If that decision ever changes, set the repo private and disable Pages.
 - **No patient data.** Only the *reference knowledge* was imported from `tm-coag-logger`. None of its case log, notebook, or any PHI is included. The composers build copy-ready note **skeletons** in-memory only — nothing is stored or transmitted.
 - **Decision support, not protocol.** MSBOS is institution-specific; ASFA tables follow the 9th ed. (2023); antigen frequencies are population estimates. Verify against current policy and the source documents; the attending / blood bank physician is the final decision-maker.
 
@@ -51,6 +51,6 @@ python3 -m http.server 8147     # then visit http://localhost:8147
 
 All clinical data lives in `assets/reference/refdata.js` as plain JSON assigned to `window.ERICREF` (`bloodprep`, `asfaInd`, `asfaProto`, `txn`, `plateletPanel`, `tmPanel`). Edit the values to refine a threshold, add a surgery, or update an ASFA row. The rule-matching language for the panels (platelet, transfusion-reaction) is documented in the original `tmcoag/docs/PANELS.md`.
 
-## Deploy (private)
+## Deploy
 
-Pushed to a **private** GitHub repo. If your plan supports **GitHub Pages on private repositories** (Pro/Team/Enterprise), enable Pages → `main` / root for an access-controlled live URL; otherwise run it locally or host it behind your institution's auth.
+**Live:** https://omarzbaba.github.io/transfusion-medicine-residency-eric/ — public GitHub Pages (`main` / root). It also runs fully offline: open `index.html` directly, no server needed.
