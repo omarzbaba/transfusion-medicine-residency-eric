@@ -1,0 +1,1823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<meta name="description" content="Transfusion medicine & blood bank onboarding and clinical decision-support reference for the Henry Ford Pathology Residency. Built for Eric." />
+<title>Blood Bank &amp; Transfusion Medicine — Resident Reference</title>
+<script>/* set theme before paint to avoid flash */(function(){try{var t=localStorage.getItem('tm-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<style id="css">
+/* ============================================================
+   DESIGN TOKENS  —  warm-neutral monochrome + single blue accent
+   ============================================================ */
+:root{
+  --sb: 264px;            /* sidebar width */
+  --hb: 56px;             /* header height */
+  --maxw: 1000px;         /* readable column */
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 22px;
+  --space-sec: clamp(3.2rem, 2.2rem + 4vw, 6rem);
+  --dur: 400ms;
+  --dur-fast: 200ms;
+  --ease: cubic-bezier(.4,0,.2,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* muted semantic hues — used only as small accents / labels / quiz states */
+  --blood: #c0556e;
+  --coag:  #b07d2e;
+  --aph:   #3a8f96;
+  --good:  #2e8b57;
+  --bad:   #cf3b46;
+  --warn:  #a8772a;
+  --info:  #3d7fb0;
+}
+
+/* ---------- LIGHT (Apple-like) ---------- */
+html[data-theme="light"]{
+  --bg:        #ffffff;
+  --bg-2:      #f5f5f7;
+  --bg-soft:   #fbfbfd;
+  --surface:   #ffffff;
+  --surface-2: #f5f5f7;
+  --surface-3: #ececef;
+  --border:    rgba(0,0,0,.10);
+  --border-2:  rgba(0,0,0,.16);
+  --hair:      rgba(0,0,0,.08);
+  --text:      #1d1d1f;
+  --muted:     #6e6e73;
+  --faint:     #86868b;
+  --accent:    #0071e3;
+  --accent-press:#0077ed;
+  --accent-soft: rgba(0,113,227,.10);
+  --on-accent: #ffffff;
+  --shadow:    0 1px 2px rgba(0,0,0,.04);
+  --shadow-hover: 0 4px 18px -6px rgba(0,0,0,.12);
+  --shadow-lg: 0 24px 60px -28px rgba(0,0,0,.22);
+  --nav-bg:    rgba(255,255,255,.72);
+  --ambient-1: rgba(0,113,227,.05);
+  --ambient-2: rgba(192,85,110,.045);
+  color-scheme: light;
+}
+/* ---------- DARK (true black, Apple-like) ---------- */
+html[data-theme="dark"]{
+  --bg:        #000000;
+  --bg-2:      #0b0b0c;
+  --bg-soft:   #101012;
+  --surface:   #141416;
+  --surface-2: #1c1c1f;
+  --surface-3: #28282c;
+  --border:    rgba(255,255,255,.11);
+  --border-2:  rgba(255,255,255,.20);
+  --hair:      rgba(255,255,255,.08);
+  --text:      #f5f5f7;
+  --muted:     #a1a1a6;
+  --faint:     #86868b;
+  --accent:    #2997ff;
+  --accent-press:#0a84ff;
+  --accent-soft: rgba(41,151,255,.14);
+  --on-accent: #ffffff;
+  --shadow:    0 1px 2px rgba(0,0,0,.5);
+  --shadow-hover: 0 8px 26px -10px rgba(0,0,0,.7);
+  --shadow-lg: 0 30px 70px -30px rgba(0,0,0,.85);
+  --nav-bg:    rgba(10,10,12,.62);
+  --ambient-1: rgba(41,151,255,.06);
+  --ambient-2: rgba(192,85,110,.05);
+  color-scheme: dark;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box }
+html{ scroll-behavior:smooth }
+body{
+  margin:0; font-family:var(--font); color:var(--text); background:var(--bg);
+  font-size:15px; line-height:1.6; letter-spacing:-0.012em;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; overflow:hidden;
+}
+/* ambient depth — single very soft, slow radial wash (no particles) */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 82% -6%, var(--ambient-1), transparent 60%),
+    radial-gradient(50% 45% at -8% 4%, var(--ambient-2), transparent 55%);
+  animation:drift 26s var(--ease) infinite alternate;
+}
+@keyframes drift{ from{ transform:translate3d(0,0,0) } to{ transform:translate3d(0,-14px,0) } }
+/* faint grain overlay for editorial texture */
+body::after{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+h1,h2,h3,h4,h5{ margin:0; line-height:1.12; letter-spacing:-0.025em; font-weight:600 }
+p{ margin:0 }
+a{ color:inherit; text-decoration:none }
+strong{ font-weight:600; color:var(--text) }
+em{ font-style:italic }
+::selection{ background:var(--accent-soft); color:var(--text) }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:5px }
+
+.skip-link{ position:fixed; left:-999px; top:8px; z-index:100; background:var(--text); color:var(--bg); padding:.5rem .9rem; border-radius:8px }
+.skip-link:focus{ left:8px }
+
+.main::-webkit-scrollbar{ width:10px }
+.main::-webkit-scrollbar-thumb{ background:var(--border-2); border-radius:99px; border:3px solid transparent; background-clip:content-box }
+
+.scroll-progress{ position:fixed; top:0; left:0; right:0; height:2px; z-index:60 }
+.scroll-progress span{ display:block; height:100%; width:0%; background:var(--accent); transition:width 90ms linear }
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+.app{ display:grid; grid-template-columns:var(--sb) 1fr; grid-template-rows:var(--hb) 1fr; height:100vh; height:100dvh }
+
+/* sidebar */
+.sidebar{ grid-row:1 / 3; grid-column:1; display:flex; flex-direction:column; gap:4px;
+  border-right:1px solid var(--hair); background:var(--bg); padding:20px 14px; z-index:40 }
+.brand{ display:flex; align-items:center; gap:11px; padding:4px 8px 18px }
+.brand-mark{ width:34px; height:34px; flex:0 0 auto; display:grid; place-items:center; border-radius:9px;
+  background:var(--surface-2); border:1px solid var(--hair); color:var(--text) }
+.brand-text{ display:flex; flex-direction:column; line-height:1.25 }
+.brand-text strong{ font-size:.9rem; font-weight:600; letter-spacing:-0.02em }
+.brand-text span{ font-size:.72rem; color:var(--faint) }
+
+.nav{ display:flex; flex-direction:column; gap:1px; overflow-y:auto; flex:1; margin:0 -4px; padding:0 4px }
+.nav-group{ font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; color:var(--faint);
+  margin:16px 10px 6px; font-weight:600 }
+.nav-item{ display:flex; align-items:center; gap:11px; padding:8px 11px; border-radius:8px;
+  font-size:.86rem; font-weight:450; color:var(--muted); transition:background var(--dur-fast), color var(--dur-fast) }
+.nav-item:hover{ background:var(--surface-2); color:var(--text) }
+.nav-item.is-active{ background:var(--surface-2); color:var(--text); font-weight:550 }
+.nav-ico{ font-size:.5rem; color:var(--faint); width:10px; text-align:center }
+.nav-item.is-active .nav-ico{ color:var(--accent) }
+.nav-ico--blood{ color:var(--blood) } .nav-ico--coag{ color:var(--coag) } .nav-ico--aph{ color:var(--aph) }
+
+.sidebar-foot{ padding-top:14px; border-top:1px solid var(--hair); margin-top:4px }
+.learner-chip{ display:flex; align-items:center; gap:10px; padding:8px; border-radius:10px }
+.learner-avatars{ display:flex }
+.learner-avatars span{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+  font-size:.7rem; font-weight:600; color:#fff; border:2px solid var(--bg) }
+.learner-avatars span:first-child{ background:#7c7c82 }
+.learner-avatars span:last-child{ background:#54545a; margin-left:-9px }
+.learner-meta{ display:flex; flex-direction:column; line-height:1.25 }
+.learner-meta strong{ font-size:.8rem; font-weight:600 } .learner-meta span{ font-size:.68rem; color:var(--faint) }
+
+/* topbar — the one place a navbar blur is allowed */
+.topbar{ grid-column:2; grid-row:1; display:flex; align-items:center; gap:14px; padding:0 clamp(16px,3vw,34px);
+  border-bottom:1px solid var(--hair); background:var(--nav-bg); backdrop-filter:saturate(1.8) blur(20px);
+  -webkit-backdrop-filter:saturate(1.8) blur(20px); z-index:30 }
+.crumb{ display:flex; flex-direction:column; line-height:1.15; flex:1; min-width:0 }
+.crumb-kicker{ font-size:.6rem; text-transform:uppercase; letter-spacing:.14em; color:var(--faint); font-weight:600 }
+.crumb-title{ font-size:.95rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.02em }
+.topbar-right{ display:flex; align-items:center; gap:10px }
+
+.icon-btn{ width:36px; height:36px; flex:0 0 auto; display:grid; place-items:center; border-radius:9px;
+  background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer;
+  transition:background var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) }
+.icon-btn:hover{ background:var(--surface-2); color:var(--text) }
+.icon-btn:active{ transform:scale(.94) }
+.menu-btn{ display:none }
+.ico-moon{ display:none } html[data-theme="dark"] .ico-sun{ display:none } html[data-theme="dark"] .ico-moon{ display:block }
+
+.progress-pill{ display:flex; align-items:center; gap:9px; padding:5px 13px 5px 6px; border-radius:99px;
+  border:1px solid var(--border) }
+.ring{ transform:rotate(-90deg) }
+.ring-bg{ fill:none; stroke:var(--border-2); stroke-width:3 }
+.ring-fg{ fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round;
+  stroke-dasharray:97.4; stroke-dashoffset:97.4; transition:stroke-dashoffset var(--dur) var(--ease) }
+.progress-pill-text{ display:flex; flex-direction:column; line-height:1.1 }
+.progress-pill-text strong{ font-size:.8rem; font-weight:600 } .progress-pill-text span{ font-size:.63rem; color:var(--faint) }
+
+/* main */
+.main{ grid-column:2; grid-row:2; overflow-y:auto; scroll-behavior:smooth; position:relative }
+.section{ max-width:var(--maxw); margin:0 auto; padding:var(--space-sec) clamp(18px,3vw,40px); scroll-margin-top:20px }
+.section + .section{ border-top:1px solid var(--hair) }
+.section-head{ margin-bottom:30px; max-width:70ch }
+.section-head h2{ font-size:clamp(1.7rem,1.2rem+1.9vw,2.4rem); margin:12px 0 12px; letter-spacing:-0.03em }
+.section-sub{ color:var(--muted); max-width:64ch; font-size:1rem; line-height:1.55 }
+
+/* ============================================================
+   REVEAL
+   ============================================================ */
+.reveal{ opacity:0; transform:translateY(12px); transition:opacity .6s var(--ease-out), transform .6s var(--ease-out) }
+.reveal.in{ opacity:1; transform:none }
+
+/* ============================================================
+   PRIMITIVES
+   ============================================================ */
+.kicker{ display:inline-block; font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.14em; color:var(--accent) }
+.kicker--blood{ color:var(--blood) } .kicker--coag{ color:var(--coag) } .kicker--aph{ color:var(--aph) }
+
+.surface{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px }
+.muted-note{ color:var(--faint); font-size:.85rem }
+.ticks{ list-style:none; padding:0; margin:12px 0; display:flex; flex-direction:column; gap:9px }
+.ticks li{ position:relative; padding-left:24px; font-size:.9rem; color:var(--muted) }
+.ticks li::before{ content:""; position:absolute; left:2px; top:.55em; width:9px; height:5px;
+  border-left:1.6px solid var(--accent); border-bottom:1.6px solid var(--accent); transform:rotate(-45deg) }
+
+.grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:24px }
+.grid-2{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px }
+.grid-auto{ display:grid; grid-template-columns:repeat(auto-fit,minmax(244px,1fr)); gap:16px }
+
+.btn{ display:inline-flex; align-items:center; gap:7px; padding:11px 20px; border-radius:12px; font-size:.9rem;
+  font-weight:550; cursor:pointer; border:1px solid transparent; font-family:inherit; letter-spacing:-0.01em;
+  transition:background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast), color var(--dur-fast) }
+.btn:active{ transform:scale(.98) }
+.btn--primary{ background:var(--accent); color:var(--on-accent) }
+.btn--primary:hover{ background:var(--accent-press) }
+.btn--ghost{ background:transparent; border-color:var(--border-2); color:var(--text) }
+.btn--ghost:hover{ background:var(--surface-2) }
+.btn--sm{ padding:8px 15px; font-size:.82rem; border-radius:9px }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{ padding:28px 0 8px }
+.hero-title{ font-size:clamp(2.2rem,1.3rem+3.6vw,3.6rem); margin:18px 0 18px; max-width:17ch; line-height:1.04; letter-spacing:-0.035em; font-weight:600 }
+.hero-lede{ font-size:clamp(1.05rem,.96rem+.5vw,1.3rem); color:var(--muted); max-width:58ch; line-height:1.5; font-weight:400 }
+.hero-lede strong{ color:var(--text); font-weight:550 }
+.hero-actions{ display:flex; gap:12px; margin:28px 0 36px; flex-wrap:wrap }
+.hero-stats{ display:grid; grid-template-columns:repeat(4,auto); gap:40px; margin:0; padding-top:26px; border-top:1px solid var(--hair) }
+.hero-stats div{ display:flex; flex-direction:column-reverse; gap:3px }
+.hero-stats dt{ font-size:.72rem; color:var(--faint); text-transform:uppercase; letter-spacing:.06em }
+.hero-stats dd{ margin:0; font-size:2rem; font-weight:600; letter-spacing:-0.04em; color:var(--text) }
+
+.pillar-card{ position:relative; display:flex; flex-direction:column; gap:10px; padding:26px; border-radius:var(--radius);
+  background:var(--surface); border:1px solid var(--border);
+  transition:transform var(--dur) var(--ease-out), border-color var(--dur), box-shadow var(--dur) }
+.pillar-card:hover{ transform:translateY(-3px); border-color:var(--border-2); box-shadow:var(--shadow-hover) }
+.pillar-num{ font-family:var(--mono); font-size:.74rem; font-weight:500; color:var(--faint); letter-spacing:.04em }
+.pillar-card h3{ font-size:1.16rem; letter-spacing:-0.02em }
+.pillar-card p{ font-size:.9rem; color:var(--muted); flex:1; line-height:1.5 }
+.pillar-go{ font-size:.84rem; font-weight:550; color:var(--accent); margin-top:4px; transition:gap var(--dur-fast) }
+.pillar-card:hover .pillar-go{ text-decoration:none }
+
+.how-row{ display:grid; grid-template-columns:1.15fr 1fr; gap:16px; margin-top:24px }
+.how-card h4{ font-size:1rem; margin-bottom:8px; font-weight:600 }
+.how-card--accent{ background:var(--bg-2); border-color:var(--hair) }
+.big-quote{ font-size:1.18rem; font-weight:500; line-height:1.4; margin:6px 0 14px; letter-spacing:-0.02em }
+.big-quote em{ color:var(--accent); font-style:normal }
+.legend{ display:flex; flex-wrap:wrap; gap:7px; margin-top:14px }
+
+/* ============================================================
+   TAGS + CALLOUTS  (muted pastel labels, quiet boxes)
+   ============================================================ */
+.tag{ display:inline-flex; align-items:center; font-size:.62rem; font-weight:600; padding:3px 9px; border-radius:99px;
+  letter-spacing:.07em; text-transform:uppercase; white-space:nowrap;
+  color:var(--c,var(--muted)); background:color-mix(in srgb, var(--c,var(--muted)) 13%, transparent) }
+.tag--why{ --c:var(--info) } .tag--pattern{ --c:var(--accent) } .tag--next{ --c:var(--good) }
+.tag--pearl{ --c:var(--coag) } .tag--adv{ --c:var(--aph) } .tag--pitfall{ --c:var(--bad) } .tag--dnc{ --c:var(--warn) }
+
+.callout{ --c:var(--accent); padding:14px 16px; border-radius:var(--radius-sm); background:var(--bg-2);
+  border:1px solid var(--hair); border-left:2px solid var(--c); margin-top:12px; font-size:.9rem }
+.callout > .tag{ margin-bottom:7px }
+.callout p{ color:var(--muted); line-height:1.5 } .callout strong{ color:var(--text) }
+.callout--why{ --c:var(--info) } .callout--pattern{ --c:var(--accent) } .callout--next{ --c:var(--good) }
+.callout--pearl{ --c:var(--coag) } .callout--adv{ --c:var(--aph) } .callout--pitfall{ --c:var(--bad) } .callout--dnc{ --c:var(--warn) }
+
+/* ============================================================
+   TEACHING CARDS  (icon-free, text-forward)
+   ============================================================ */
+.tcard{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px;
+  transition:border-color var(--dur), box-shadow var(--dur), transform var(--dur) }
+.tcard:hover{ border-color:var(--border-2); box-shadow:var(--shadow-hover) }
+.tcard-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap }
+.tcard-ico{ display:none }
+.tcard h4{ font-size:1rem; font-weight:600; letter-spacing:-0.02em } .tcard .sub{ font-size:.72rem; color:var(--faint) }
+.tcard-body{ font-size:.89rem; color:var(--muted); margin-top:2px; line-height:1.55 }
+.tcard-body p + p{ margin-top:9px }
+.spec-row{ display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-top:1px solid var(--hair); font-size:.84rem }
+.spec-row:first-of-type{ border-top:none }
+.spec-row span:first-child{ color:var(--faint) } .spec-row span:last-child{ font-weight:550; text-align:right; color:var(--text) }
+.dose{ font-family:var(--mono); font-size:.82rem }
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.table-wrap{ overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); -webkit-overflow-scrolling:touch }
+table.cmp{ width:100%; border-collapse:collapse; font-size:.85rem; min-width:640px }
+.cmp th,.cmp td{ padding:12px 16px; text-align:left; border-bottom:1px solid var(--hair); vertical-align:top }
+.cmp tbody tr:last-child td{ border-bottom:none }
+.cmp thead th{ position:sticky; top:0; background:var(--bg-2); font-size:.66rem; text-transform:uppercase;
+  letter-spacing:.07em; color:var(--faint); font-weight:600; z-index:1 }
+.cmp tbody tr:hover{ background:var(--surface-2) }
+.cmp td:first-child{ font-weight:600; color:var(--text) }
+.cmp .pill{ font-family:var(--mono); font-size:.74rem; padding:2px 8px; border-radius:6px; background:var(--surface-2); border:1px solid var(--hair); white-space:nowrap }
+
+/* ============================================================
+   ACCORDION  (stripped — hairline rows, +/- toggle)
+   ============================================================ */
+.acc{ border-bottom:1px solid var(--hair) }
+.acc summary{ list-style:none; cursor:pointer; padding:16px 4px; display:flex; align-items:center; gap:12px;
+  font-weight:550; font-size:.92rem; letter-spacing:-0.01em; transition:color var(--dur-fast) }
+.acc summary::-webkit-details-marker{ display:none }
+.acc summary:hover{ color:var(--accent) }
+.acc .chev{ margin-left:auto; color:var(--faint); font-size:1.2rem; line-height:1; width:16px; text-align:center; transition:transform var(--dur) var(--ease) }
+.acc .chev::before{ content:"+" }
+.acc[open] .chev::before{ content:"\2212" }
+.acc[open] .chev{ color:var(--accent) }
+.acc-body{ padding:0 4px 18px; font-size:.89rem; color:var(--muted); line-height:1.55 }
+.acc-body p + p{ margin-top:9px }
+.acc .dot{ width:7px; height:7px; border-radius:50%; flex:0 0 auto }
+
+/* ============================================================
+   TABS
+   ============================================================ */
+.tabs{ display:flex; gap:4px; padding:4px; background:var(--surface-2); border:1px solid var(--hair); border-radius:11px; margin-bottom:18px; flex-wrap:wrap }
+.tab{ flex:1; min-width:110px; padding:8px 12px; border-radius:8px; font-size:.83rem; font-weight:550; cursor:pointer;
+  border:none; background:transparent; color:var(--muted); font-family:inherit; transition:all var(--dur-fast) }
+.tab:hover{ color:var(--text) }
+.tab.is-active{ background:var(--surface); color:var(--text); box-shadow:var(--shadow) }
+.tabpane{ display:none; animation:fade .4s var(--ease-out) }
+.tabpane.is-active{ display:block }
+@keyframes fade{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* ============================================================
+   ALGORITHM
+   ============================================================ */
+.algo{ display:flex; flex-direction:column; gap:10px; margin-top:8px }
+.algo-node{ display:flex; gap:14px; align-items:flex-start; padding:16px 18px; border-radius:var(--radius);
+  background:var(--surface); border:1px solid var(--border) }
+.algo-step{ font-family:var(--mono); font-size:.74rem; font-weight:600; color:var(--on-accent); background:var(--accent);
+  width:25px; height:25px; flex:0 0 auto; border-radius:7px; display:grid; place-items:center }
+.algo-node h5{ margin:0 0 4px; font-size:.94rem; font-weight:600 }
+.algo-node p{ font-size:.85rem; color:var(--muted); line-height:1.5 }
+.algo-branch{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.algo-branch .algo-node{ background:var(--bg-2) }
+.branch-tag{ font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px; display:block }
+.b-corrects .branch-tag{ color:var(--good) } .b-inhibits .branch-tag{ color:var(--bad) }
+
+/* ============================================================
+   QUIZ
+   ============================================================ */
+.quiz-toolbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px }
+.filter-chips{ display:flex; gap:6px; flex-wrap:wrap }
+.chip{ padding:7px 15px; border-radius:99px; font-size:.8rem; font-weight:550; cursor:pointer; font-family:inherit;
+  background:transparent; border:1px solid var(--border); color:var(--muted); transition:all var(--dur-fast) }
+.chip:hover{ color:var(--text); border-color:var(--border-2) }
+.chip.is-active{ background:var(--text); border-color:var(--text); color:var(--bg) }
+.scoreboard{ margin-left:auto; display:flex; align-items:center; gap:14px; font-size:.82rem; color:var(--muted) }
+.scoreboard b{ color:var(--text); font-family:var(--mono); font-weight:600 }
+
+.q{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:14px }
+.q-meta{ display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap }
+.q-diff{ font-size:.62rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; padding:2px 8px; border-radius:99px;
+  color:var(--c,var(--muted)); background:color-mix(in srgb, var(--c,var(--muted)) 13%, transparent) }
+.q-diff.easy{ --c:var(--good) } .q-diff.moderate{ --c:var(--coag) } .q-diff.integrative{ --c:var(--bad) }
+.q-pillar{ font-size:.64rem; font-weight:600; color:var(--faint); text-transform:uppercase; letter-spacing:.07em }
+.q-stem{ font-size:.95rem; font-weight:450; margin-bottom:14px; line-height:1.55 }
+.q-opts{ display:flex; flex-direction:column; gap:8px }
+.opt{ text-align:left; padding:12px 15px; border-radius:10px; border:1px solid var(--border); background:var(--surface);
+  cursor:pointer; font-family:inherit; font-size:.88rem; color:var(--text); display:flex; gap:12px; align-items:flex-start;
+  transition:border-color var(--dur-fast), background var(--dur-fast) }
+.opt:hover:not(:disabled){ border-color:var(--border-2); background:var(--surface-2) }
+.opt:disabled{ cursor:default }
+.opt-key{ font-family:var(--mono); font-weight:600; font-size:.76rem; width:20px; height:20px; flex:0 0 auto;
+  border-radius:6px; display:grid; place-items:center; background:var(--surface-2); border:1px solid var(--hair); color:var(--muted) }
+.opt.is-correct{ border-color:var(--good); background:color-mix(in srgb, var(--good) 9%, transparent) }
+.opt.is-correct .opt-key{ background:var(--good); border-color:var(--good); color:#fff }
+.opt.is-wrong{ border-color:var(--bad); background:color-mix(in srgb, var(--bad) 8%, transparent) }
+.opt.is-wrong .opt-key{ background:var(--bad); border-color:var(--bad); color:#fff }
+.opt-mark{ margin-left:auto; font-weight:600 }
+.q-explain{ margin-top:14px; border-top:1px solid var(--hair); padding-top:14px; font-size:.87rem; display:none; animation:fade .4s var(--ease-out) }
+.q-explain.show{ display:block }
+.q-explain .verdict{ font-weight:600; margin-bottom:7px; display:flex; align-items:center; gap:7px }
+.q-explain .verdict.ok{ color:var(--good) } .q-explain .verdict.no{ color:var(--bad) }
+.q-explain p{ color:var(--muted); margin-bottom:9px; line-height:1.5 }
+.q-explain .why-wrong{ font-size:.82rem; color:var(--faint) }
+.quiz-empty{ text-align:center; padding:46px 20px; color:var(--faint) }
+
+/* ============================================================
+   CASE LAB
+   ============================================================ */
+.case{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:16px }
+.case-head{ padding:18px 22px; border-bottom:1px solid var(--hair); display:flex; gap:13px; align-items:flex-start }
+.case-tag{ font-size:.62rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; padding:3px 9px; border-radius:99px;
+  flex:0 0 auto; margin-top:2px; color:var(--c,var(--muted)); background:color-mix(in srgb, var(--c,var(--muted)) 13%, transparent) }
+.case-tag.blood{ --c:var(--blood) } .case-tag.coag{ --c:var(--coag) } .case-tag.aph{ --c:var(--aph) } .case-tag.mixed{ --c:var(--accent) }
+.case-head h4{ font-size:1.02rem; margin-bottom:4px; font-weight:600 } .case-head p{ font-size:.85rem; color:var(--muted); line-height:1.5 }
+.case-body{ padding:8px 22px 20px }
+.case-step{ padding:16px 0; border-bottom:1px solid var(--hair) }
+.case-step:last-child{ border-bottom:none }
+.case-step .label{ font-size:.66rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--accent); margin-bottom:6px }
+.case-step .prompt{ font-size:.92rem; font-weight:450; line-height:1.5 }
+.case-reveal{ margin-top:10px; font-size:.87rem; color:var(--muted); background:var(--bg-2); border:1px solid var(--hair);
+  border-radius:10px; padding:0 15px; max-height:0; overflow:hidden; opacity:0;
+  transition:max-height .45s var(--ease), opacity .35s, padding .45s var(--ease); line-height:1.55 }
+.case-reveal.show{ max-height:640px; opacity:1; padding:14px 15px; margin-top:10px }
+.case-reveal strong{ color:var(--text) }
+.case-controls{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap }
+.labs{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 }
+.lab{ font-family:var(--mono); font-size:.78rem; padding:5px 10px; border-radius:8px; background:var(--bg-2); border:1px solid var(--hair); display:flex; gap:7px; align-items:baseline }
+.lab .k{ color:var(--faint) } .lab .v{ font-weight:600 }
+.lab.hi .v{ color:var(--bad) } .lab.lo .v{ color:var(--info) } .lab.crit .v{ color:var(--warn) }
+
+/* ============================================================
+   GLOSSARY
+   ============================================================ */
+.search{ display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:12px; background:var(--surface); border:1px solid var(--border); margin-bottom:18px }
+.search input{ flex:1; border:none; background:transparent; color:var(--text); font-family:inherit; font-size:.92rem; outline:none }
+.search input::placeholder{ color:var(--faint) }
+.search svg{ color:var(--faint); flex:0 0 auto }
+.gloss-list{ display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:12px }
+.gloss-item{ padding:16px 18px; border-radius:var(--radius-sm); background:var(--surface); border:1px solid var(--border);
+  transition:border-color var(--dur-fast), transform var(--dur-fast) }
+.gloss-item:hover{ border-color:var(--border-2); transform:translateY(-2px) }
+.gloss-item .term{ font-weight:600; font-size:.9rem; display:flex; align-items:center; gap:8px; letter-spacing:-0.01em }
+.gloss-item .abbr{ font-family:var(--mono); font-size:.7rem; color:var(--accent); background:var(--accent-soft); padding:1px 7px; border-radius:5px }
+.gloss-item .def{ font-size:.84rem; color:var(--muted); margin-top:6px; line-height:1.5 }
+.gloss-item.mustknow{ border-left:2px solid var(--accent) }
+.gloss-empty{ grid-column:1/-1; text-align:center; padding:40px; color:var(--faint) }
+
+/* ============================================================
+   RECAP
+   ============================================================ */
+.recap-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:18px; align-items:start }
+.takehome{ counter-reset:th; padding:0; margin:0 }
+.takehome li{ list-style:none; position:relative; padding:14px 16px 14px 52px; margin-bottom:9px; border-radius:var(--radius-sm);
+  background:var(--surface); border:1px solid var(--border); font-size:.9rem; line-height:1.5 }
+.takehome li::before{ counter-increment:th; content:counter(th,decimal-leading-zero); position:absolute; left:16px; top:14px;
+  font-family:var(--mono); font-weight:500; font-size:.78rem; color:var(--accent) }
+.takehome li strong{ color:var(--text) }
+.recap-side{ display:flex; flex-direction:column; gap:16px }
+.rounds-list{ list-style:none; padding:0; margin:8px 0 0; display:flex; flex-direction:column; gap:11px }
+.rounds-list li{ font-size:.86rem; color:var(--muted); padding-left:16px; position:relative; line-height:1.45 }
+.rounds-list li::before{ content:""; position:absolute; left:0; top:.55em; width:5px; height:5px; border-radius:50%; background:var(--accent) }
+.ask-list{ list-style:none; padding:0; margin:8px 0 0; display:flex; flex-direction:column; gap:8px }
+.ask-list li{ font-size:.86rem; padding:10px 13px; border-radius:9px; background:var(--bg-2); border:1px solid var(--hair); color:var(--muted); line-height:1.45 }
+
+/* ============================================================
+   FOOTER + misc
+   ============================================================ */
+.foot{ max-width:var(--maxw); margin:0 auto; padding:32px clamp(18px,3vw,40px) 64px; border-top:1px solid var(--hair) }
+.foot p{ font-size:.82rem; color:var(--faint); margin-bottom:8px; line-height:1.5 }
+.foot p:first-child{ color:var(--muted) }
+.to-top{ position:fixed; right:22px; bottom:22px; width:42px; height:42px; border-radius:11px; z-index:50;
+  background:var(--surface); color:var(--text); border:1px solid var(--border-2); cursor:pointer; font-size:1.1rem;
+  box-shadow:var(--shadow-lg); transition:transform var(--dur-fast), color var(--dur-fast) }
+.to-top:hover{ transform:translateY(-3px); color:var(--accent) }
+.to-top[hidden]{ display:none }
+.stack{ display:flex; flex-direction:column; gap:16px }
+.mt24{ margin-top:26px } .mt16{ margin-top:16px } .mb8{ margin-bottom:8px }
+.lead-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:1024px){
+  :root{ --sb:0px }
+  .menu-btn{ display:grid }
+  .sidebar{ position:fixed; top:0; bottom:0; left:0; width:272px; transform:translateX(-100%);
+    transition:transform var(--dur) var(--ease); box-shadow:var(--shadow-lg) }
+  body.nav-open .sidebar{ transform:none }
+  .topbar{ grid-column:1 / -1 } .main{ grid-column:1 / -1 }
+  body.nav-open::after{ content:""; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:35 }
+}
+@media (max-width:760px){
+  .grid-3{ grid-template-columns:1fr } .how-row{ grid-template-columns:1fr }
+  .hero-stats{ grid-template-columns:repeat(2,1fr); gap:22px }
+  .recap-grid{ grid-template-columns:1fr } .algo-branch{ grid-template-columns:1fr }
+  .progress-pill-text{ display:none }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important; scroll-behavior:auto !important }
+  .reveal{ opacity:1; transform:none }
+  body::before{ animation:none }
+}
+/* ============================================================
+   CLINICAL REFERENCE TOOLS
+   ============================================================ */
+.ref-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start }
+.ref-controls{ display:flex; flex-direction:column; gap:14px }
+.ref-card{ padding:18px }
+.ref-card h4{ font-size:.98rem; margin-bottom:10px }
+.ref-report{ position:sticky; top:14px; padding:20px }
+.ref-report-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px }
+.ref-field{ display:block; margin-bottom:12px }
+.ref-field:last-child{ margin-bottom:0 }
+.ref-field-l{ display:block; font-size:.8rem; font-weight:550; margin-bottom:5px; color:var(--muted) }
+.ref-field-h{ display:block; font-size:.72rem; color:var(--faint); margin-top:3px }
+.ref-input, .ref-select{ width:100%; padding:9px 11px; border-radius:9px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font-family:inherit; font-size:.86rem; outline:none }
+textarea.ref-input{ resize:vertical; line-height:1.5 }
+.ref-input:focus, .ref-select:focus{ border-color:var(--accent) }
+
+.seg{ display:inline-flex; gap:4px; padding:4px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; flex-wrap:wrap }
+.seg-btn{ padding:6px 12px; border:none; background:transparent; border-radius:7px; font-size:.82rem; font-weight:550; color:var(--muted); cursor:pointer; font-family:inherit; transition:all var(--dur-fast) }
+.seg-btn:hover{ color:var(--text) }
+.seg-btn.sel{ background:var(--surface); color:var(--text); box-shadow:var(--shadow) }
+
+.analyte-row{ display:flex; justify-content:space-between; gap:12px; align-items:center; padding:9px 0; border-top:1px solid var(--hair); flex-wrap:wrap }
+.analyte-row:first-of-type{ border-top:none }
+.analyte-name{ font-size:.86rem; font-weight:500 }
+.analyte-ref{ font-family:var(--mono); font-size:.72rem; color:var(--faint); margin-left:6px }
+.analyte-help{ display:block; font-size:.72rem; color:var(--faint); font-weight:400 }
+.state-btns{ display:flex; gap:5px; flex-wrap:wrap }
+.state-btn{ padding:6px 10px; border-radius:7px; border:1px solid var(--border); background:var(--surface-2);
+  font-size:.78rem; font-weight:550; cursor:pointer; font-family:inherit; color:var(--muted); transition:all var(--dur-fast) }
+.state-btn:hover{ color:var(--text); border-color:var(--border-2) }
+.state-btn.sel{ color:var(--text); border-color:var(--accent); background:var(--accent-soft) }
+.state-btn.k-normal.sel{ border-color:var(--good); background:color-mix(in srgb,var(--good) 13%, transparent) }
+.state-btn.k-abnormal.sel{ border-color:var(--warn); background:color-mix(in srgb,var(--warn) 15%, transparent) }
+.state-btn.k-skip.sel{ border-color:var(--border-2); background:var(--surface-3) }
+
+.ref-sec{ margin-top:14px }
+.ref-sec h5{ font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); margin:0 0 6px }
+.ref-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px }
+.ref-list li{ font-size:.85rem; color:var(--muted); padding-left:14px; position:relative; line-height:1.45 }
+.ref-list li::before{ content:"–"; position:absolute; left:0; color:var(--faint) }
+.ref-sec.flag .ref-list li{ color:var(--bad) }
+.imp-line{ display:flex; gap:9px; align-items:flex-start; font-size:.88rem; padding:9px 11px; border-radius:9px; margin-bottom:6px; line-height:1.4; background:var(--surface-2) }
+.imp-line .imp-dot{ font-size:.7rem; margin-top:2px }
+.imp-line.good{ background:color-mix(in srgb,var(--good) 10%,transparent) } .imp-line.good .imp-dot{ color:var(--good) }
+.imp-line.info{ background:color-mix(in srgb,var(--info) 10%,transparent) } .imp-line.info .imp-dot{ color:var(--info) }
+.imp-line.warn{ background:color-mix(in srgb,var(--warn) 12%,transparent) } .imp-line.warn .imp-dot{ color:var(--warn) }
+.imp-line.bad{ background:color-mix(in srgb,var(--bad) 11%,transparent) } .imp-line.bad .imp-dot{ color:var(--bad) }
+.ref-wnl{ font-size:.8rem; font-style:italic; color:var(--faint); margin-top:6px }
+.ref-disclaimer{ font-size:.74rem; color:var(--faint); margin-top:14px; border-top:1px solid var(--hair); padding-top:10px; line-height:1.45 }
+
+.bp-headline{ font-size:1.05rem; font-weight:600; padding:12px 14px; border-radius:10px; margin-bottom:12px; letter-spacing:-0.01em }
+.bp-headline.good{ background:color-mix(in srgb,var(--good) 12%,transparent); color:var(--good) }
+.bp-headline.warn{ background:color-mix(in srgb,var(--warn) 14%,transparent); color:var(--warn) }
+.bp-headline.bad{ background:color-mix(in srgb,var(--bad) 12%,transparent); color:var(--bad) }
+.bp-stats{ display:flex; gap:10px; margin-bottom:6px }
+.bp-stat{ flex:1; background:var(--surface-2); border:1px solid var(--hair); border-radius:9px; padding:10px; text-align:center; display:flex; flex-direction:column; gap:2px }
+.bp-stat strong{ font-size:1.25rem; font-family:var(--mono); font-weight:600 }
+.bp-stat span{ font-size:.66rem; color:var(--faint) }
+
+.surg-selected{ padding:6px 0 4px; display:flex; gap:10px; align-items:center; font-size:.88rem; flex-wrap:wrap }
+.surg-results{ max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-top:8px }
+.surg-row{ display:flex; justify-content:space-between; gap:10px; align-items:center; padding:8px 11px; border:1px solid var(--hair); border-radius:8px; background:var(--surface-2); cursor:pointer; font-family:inherit; font-size:.84rem; color:var(--text); text-align:left }
+.surg-row:hover{ border-color:var(--border-2); background:var(--surface-3) }
+.ord-tag{ font-family:var(--mono); font-size:.72rem; padding:2px 8px; border-radius:6px; background:var(--surface-3); border:1px solid var(--hair); white-space:nowrap; color:var(--muted) }
+.ord-tag.hi{ color:var(--bad) }
+.ab-group{ margin-top:10px }
+.ab-sys{ font-size:.66rem; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); margin-bottom:6px }
+.ab-btn{ display:inline-flex; gap:6px; align-items:baseline; padding:6px 10px; border-radius:7px; border:1px solid var(--border); background:var(--surface-2); font-size:.8rem; cursor:pointer; font-family:inherit; color:var(--text); margin:0 6px 6px 0; transition:all var(--dur-fast) }
+.ab-btn:hover{ border-color:var(--border-2) }
+.ab-btn.sel{ border-color:var(--accent); background:var(--accent-soft) }
+.ab-meta{ font-size:.68rem; color:var(--faint) }
+
+.asfa-cat{ font-family:var(--mono); font-weight:600; font-size:.74rem; padding:2px 8px; border-radius:6px; display:inline-block }
+.cat-I{ color:var(--good); background:color-mix(in srgb,var(--good) 15%,transparent) }
+.cat-II{ color:var(--info); background:color-mix(in srgb,var(--info) 15%,transparent) }
+.cat-III{ color:var(--coag); background:color-mix(in srgb,var(--coag) 16%,transparent) }
+.cat-IV{ color:var(--bad); background:color-mix(in srgb,var(--bad) 14%,transparent) }
+.asfa-row{ cursor:pointer }
+.asfa-row:hover{ background:var(--surface-2) }
+.asfa-detail td{ background:var(--bg-2) }
+.asfa-detail p{ font-size:.83rem; margin:4px 0; color:var(--muted) }
+.asfa-detail strong{ color:var(--text) }
+
+.aph-look{ max-height:230px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-top:8px }
+.aph-hit{ display:flex; gap:9px; align-items:center; padding:8px 10px; border:1px solid var(--hair); border-radius:8px; background:var(--surface-2); cursor:pointer; font-family:inherit; text-align:left; color:var(--text) }
+.aph-hit:hover{ border-color:var(--border-2); background:var(--surface-3) }
+.aph-hit-d{ font-size:.83rem; font-weight:500; flex:1 }
+.aph-hit-m{ font-size:.71rem; color:var(--faint); white-space:nowrap }
+.aph-asfa-row{ display:flex; gap:10px }
+.aph-asfa-row .ref-field{ flex:1 }
+
+.copyarea{ width:100%; font-family:var(--mono); font-size:.78rem; padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); line-height:1.5; resize:vertical }
+.ref-note{ position:sticky; top:14px }
+.txn-list{ margin-top:8px }
+
+.ref-toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:var(--text); color:var(--bg); padding:10px 18px; border-radius:10px; font-size:.85rem; font-weight:550; opacity:0; transition:opacity .25s var(--ease), transform .25s var(--ease); z-index:200; box-shadow:var(--shadow-lg) }
+.ref-toast.in{ opacity:1; transform:translateX(-50%) translateY(0) }
+.ref-toast.err{ background:var(--bad); color:#fff }
+
+@media (max-width:920px){
+  .ref-grid{ grid-template-columns:1fr }
+  .ref-report, .ref-note{ position:static }
+  .bp-stats{ flex-wrap:wrap }
+}
+</style>
+</head>
+<body>
+<div class="scroll-progress" aria-hidden="true"><span id="scrollbar"></span></div>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c0 0-6 6.4-6 10.5a6 6 0 0 0 12 0c0-4.1-6-10.5-6-10.5Z"/></svg>
+      </div>
+      <div class="brand-text">
+        <strong>Transfusion&nbsp;Medicine</strong>
+        <span>Henry Ford Pathology</span>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Sections">
+      <a class="nav-item is-active" href="#start" data-nav="start"><span class="nav-ico">●</span>Start here</a>
+      <p class="nav-group">The three pillars</p>
+      <a class="nav-item" href="#bloodbank" data-nav="bloodbank"><span class="nav-ico nav-ico--blood">●</span>Blood bank</a>
+      <a class="nav-item" href="#coagulation" data-nav="coagulation"><span class="nav-ico nav-ico--coag">●</span>Coagulation</a>
+      <a class="nav-item" href="#apheresis" data-nav="apheresis"><span class="nav-ico nav-ico--aph">●</span>Apheresis</a>
+      <p class="nav-group">Clinical reference</p>
+      <a class="nav-item" href="#platelet" data-nav="platelet"><span class="nav-ico nav-ico--blood">◆</span>Platelet requests</a>
+      <a class="nav-item" href="#txnreact" data-nav="txnreact"><span class="nav-ico nav-ico--blood">◆</span>Transfusion reactions</a>
+      <a class="nav-item" href="#asfa" data-nav="asfa"><span class="nav-ico nav-ico--aph">◆</span>ASFA guidelines</a>
+      <a class="nav-item" href="#bloodprep" data-nav="bloodprep"><span class="nav-ico nav-ico--blood">◆</span>Blood for the OR</a>
+      <a class="nav-item" href="#antibody" data-nav="antibody"><span class="nav-ico nav-ico--blood">◆</span>Antibody panel ID</a>
+      <a class="nav-item" href="#aphtool" data-nav="aphtool"><span class="nav-ico nav-ico--aph">◆</span>Therapeutic apheresis</a>
+      <p class="nav-group">Practice &amp; reference</p>
+      <a class="nav-item" href="#cases" data-nav="cases"><span class="nav-ico">○</span>Case lab</a>
+      <a class="nav-item" href="#quiz" data-nav="quiz"><span class="nav-ico">○</span>Quiz center</a>
+      <a class="nav-item" href="#glossary" data-nav="glossary"><span class="nav-ico">○</span>Glossary</a>
+      <a class="nav-item" href="#recap" data-nav="recap"><span class="nav-ico">○</span>Final recap</a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="learner-chip">
+        <div class="learner-avatars" aria-hidden="true"><span style="margin-left:0">E</span></div>
+        <div class="learner-meta"><strong>Eric</strong><span>CP resident · welcome</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ HEADER ============ -->
+  <header class="topbar">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="crumb">
+      <span class="crumb-kicker">Now viewing</span>
+      <span class="crumb-title" id="crumbTitle">Start here</span>
+    </div>
+
+    <div class="topbar-right">
+      <div class="progress-pill" title="Quiz questions answered this session">
+        <svg class="ring" viewBox="0 0 36 36" width="30" height="30" aria-hidden="true">
+          <circle class="ring-bg" cx="18" cy="18" r="15.5"/>
+          <circle class="ring-fg" id="ring" cx="18" cy="18" r="15.5"/>
+        </svg>
+        <div class="progress-pill-text"><strong id="progPct">0%</strong><span id="progLabel">0 / 0 answered</span></div>
+      </div>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light and dark theme">
+        <svg class="ico-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main" id="main">
+
+    <!-- ===== START HERE ===== -->
+    <section id="start" class="section" data-section="Start here" aria-labelledby="start-h">
+      <div class="hero reveal">
+        <span class="kicker">Henry Ford Pathology Residency · Transfusion Medicine</span>
+        <h1 id="start-h" class="hero-title">Welcome to the blood bank, Eric.</h1>
+        <p class="hero-lede">This is your working dashboard for the transfusion medicine rotation — the <strong>foundations</strong> up front, then the <strong>decision-support tools</strong> we actually open on call: platelet approvals, reaction workups, ASFA, the MSBOS, antibody ID, and apheresis. Built to make you safe and genuinely useful from week one.</p>
+        <div class="hero-actions">
+          <a class="btn btn--primary" href="#bloodbank">Start with the foundations</a>
+          <a class="btn btn--ghost" href="#platelet">Open the reference tools</a>
+        </div>
+        <dl class="hero-stats">
+          <div><dt>Foundations</dt><dd>3</dd></div>
+          <div><dt>Reference tools</dt><dd>6</dd></div>
+          <div><dt>Practice questions</dt><dd id="statQ">—</dd></div>
+          <div><dt>ASFA indications</dt><dd>166</dd></div>
+        </dl>
+      </div>
+
+      <div class="grid-3 reveal">
+        <a class="pillar-card" href="#bloodbank">
+          <span class="pillar-num">01</span>
+          <h3>Blood components &amp; blood bank</h3>
+          <p>What each product does, who it’s for, how compatibility works, and how to react when a transfusion goes wrong.</p>
+          <span class="pillar-go">Open pillar →</span>
+        </a>
+        <a class="pillar-card" href="#coagulation">
+          <span class="pillar-num">02</span>
+          <h3>Coagulation testing</h3>
+          <p>A reusable way to think: bleeding vs clotting, screening vs special tests, and a clean PT/aPTT algorithm.</p>
+          <span class="pillar-go">Open pillar →</span>
+        </a>
+        <a class="pillar-card" href="#apheresis">
+          <span class="pillar-num">03</span>
+          <h3>Apheresis medicine</h3>
+          <p>The consult service: what we remove or exchange, the conditions that need it, and TTP as the can’t-miss emergency.</p>
+          <span class="pillar-go">Open pillar →</span>
+        </a>
+      </div>
+
+      <div class="how-row reveal">
+        <div class="surface how-card">
+          <h4>How to use this dashboard</h4>
+          <ul class="ticks">
+            <li>Start with the three <strong>foundations</strong>, then live in the <strong>Clinical reference</strong> tools.</li>
+            <li>The reference tools are interactive — set the context and they build a copy-ready note.</li>
+            <li>Watch for the labeled callouts as you read:</li>
+          </ul>
+          <div class="legend">
+            <span class="tag tag--why">Why it matters</span>
+            <span class="tag tag--pattern">Clinical pattern</span>
+            <span class="tag tag--next">What to do next</span>
+            <span class="tag tag--pearl">Teaching pearl</span>
+            <span class="tag tag--adv">Advanced pearl</span>
+            <span class="tag tag--pitfall">Pitfall</span>
+            <span class="tag tag--dnc">Do not confuse</span>
+          </div>
+        </div>
+        <div class="surface how-card how-card--accent">
+          <h4>Your first weeks on service</h4>
+          <p class="big-quote">Know what transfusion medicine <em>does</em> — then reach for the right tool and reason through the call <strong>safely</strong>.</p>
+          <p class="muted-note">You already know anemia, bleeding, and thrombosis. We’re adding the blood-bank framework and the decision-support tools you’ll open on call — MSBOS, platelet approvals, reaction workups, ASFA, antibody ID, and apheresis.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PILLAR 1 · BLOOD BANK ===== -->
+    <section id="bloodbank" class="section" data-section="Blood bank" aria-labelledby="bloodbank-h">
+      <div class="section-head reveal">
+        <span class="kicker kicker--blood">Pillar 01 · Blood components &amp; blood bank</span>
+        <h2 id="bloodbank-h">The blood bank: the right product, for the right patient, safely.</h2>
+        <p class="section-sub">Transfusion medicine is the clinical specialty that gets the correct blood component to the correct patient — and manages what happens when blood meets the immune system. Start here: what each product is, how compatibility works, and how to recognize a reaction.</p>
+      </div>
+
+      <div class="grid-2 reveal">
+        <div class="tcard">
+          <div class="tcard-head"><div><h4>What the blood bank actually does</h4><span class="sub">Your mental model</span></div></div>
+          <div class="tcard-body">
+            <p>It is a <strong>safety and matching service</strong>. Before most transfusions it confirms the patient’s blood type and screens their plasma for antibodies that could destroy donor red cells — then issues compatible units and watches for reactions.</p>
+            <div class="callout callout--why"><span class="tag tag--why">Why it matters</span><p>Giving incompatible red cells can cause fatal hemolysis. Almost every safe transfusion rests on one boring, vital step: correct patient identification.</p></div>
+          </div>
+        </div>
+        <div class="tcard">
+          <div class="tcard-head"><div><h4>The four products you must know</h4><span class="sub">Everything else is a variation</span></div></div>
+          <div class="tcard-body">
+            <p>Whole blood is almost always separated into components so each patient gets only what they need:</p>
+            <div class="spec-row"><span>Red cells (pRBC)</span><span>carry oxygen</span></div>
+            <div class="spec-row"><span>Platelets</span><span>plug bleeding</span></div>
+            <div class="spec-row"><span>Plasma (FFP)</span><span>replace many clotting factors</span></div>
+            <div class="spec-row"><span>Cryoprecipitate</span><span>concentrated fibrinogen</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="mt24 reveal">ABO &amp; Rh — the logic, not the memorization</h3>
+      <p class="section-sub reveal">You make antibodies against the ABO antigens you <em>lack</em> — automatically, from infancy. That single fact drives all red-cell compatibility.</p>
+      <div class="surface mt16 reveal">
+        <div class="tabs" role="tablist" aria-label="Compatibility view">
+          <button class="tab is-active" role="tab" data-tab="abo-cells">Red cell compatibility</button>
+          <button class="tab" role="tab" data-tab="abo-plasma">Plasma compatibility</button>
+          <button class="tab" role="tab" data-tab="abo-rh">Rh (D) &amp; pregnancy</button>
+        </div>
+        <div class="tabpane is-active" data-pane="abo-cells">
+          <div class="table-wrap">
+            <table class="cmp">
+              <thead><tr><th>Blood group</th><th>Antigens on RBC</th><th>Antibodies in plasma</th><th>Can receive RBCs from</th></tr></thead>
+              <tbody>
+                <tr><td>O</td><td>none</td><td>anti-A &amp; anti-B</td><td><span class="pill">O only</span></td></tr>
+                <tr><td>A</td><td>A</td><td>anti-B</td><td><span class="pill">A, O</span></td></tr>
+                <tr><td>B</td><td>B</td><td>anti-A</td><td><span class="pill">B, O</span></td></tr>
+                <tr><td>AB</td><td>A &amp; B</td><td>none</td><td><span class="pill">A, B, AB, O</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout callout--pearl"><span class="tag tag--pearl">Teaching pearl</span><p><strong>O is the universal red-cell donor</strong> (no antigens to attack). <strong>AB is the universal red-cell recipient</strong> (no antibodies to do the attacking).</p></div>
+        </div>
+        <div class="tabpane" data-pane="abo-plasma">
+          <p class="tcard-body">Plasma carries the <em>antibodies</em>, so plasma compatibility is the mirror image of red cells.</p>
+          <div class="callout callout--pearl"><span class="tag tag--pearl">Teaching pearl</span><p><strong>AB is the universal plasma donor</strong> (its plasma has no anti-A/anti-B). <strong>O is the universal plasma recipient.</strong> Notice it’s exactly reversed from red cells — that reversal is the whole trick.</p></div>
+          <div class="callout callout--dnc"><span class="tag tag--dnc">Do not confuse</span><p>Universal <em>red-cell</em> donor = <strong>O</strong>. Universal <em>plasma</em> donor = <strong>AB</strong>. Same patient, opposite answer depending on the product.</p></div>
+        </div>
+        <div class="tabpane" data-pane="abo-rh">
+          <p class="tcard-body">Rh refers to the <strong>D antigen</strong>. D-negative people don’t naturally have anti-D, but they can form it after exposure to D-positive blood.</p>
+          <div class="callout callout--next"><span class="tag tag--next">What to do next</span><p>For a <strong>D-negative female of child-bearing potential</strong>, give D-negative red cells and platelets. Anti-D crosses the placenta and causes hemolytic disease of the fetus/newborn in a future pregnancy. <strong>RhIg (RhoGAM)</strong> prevents this sensitization.</p></div>
+        </div>
+      </div>
+
+      <h3 class="mt24 reveal">Ordering: type &amp; screen, crossmatch, emergency release</h3>
+      <div class="grid-3 reveal">
+        <div class="tcard"><div class="tcard-head"><h4>Type &amp; screen</h4></div>
+          <div class="tcard-body"><p>Determine ABO/Rh and screen the patient’s plasma for unexpected antibodies. The default order when transfusion is <em>possible but not certain</em>. If the screen is negative, compatible blood can be released fast.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Type &amp; crossmatch</h4></div>
+          <div class="tcard-body"><p>Reserve specific units and test donor cells against patient plasma. Order when transfusion is <em>likely</em> (e.g., a bleeding patient or a procedure with expected loss). Units are held for that patient.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Emergency release</h4></div>
+          <div class="tcard-body"><p>No time to wait: issue <strong>O red cells</strong> (O-negative for women of child-bearing potential) and <strong>AB plasma</strong>, uncrossmatched. Lifesaving in the trauma bay; the lab catches up afterward.</p></div></div>
+      </div>
+
+      <h3 class="mt24 reveal">The product guide</h3>
+      <div class="grid-2 reveal">
+        <div class="tcard"><div class="tcard-head"><div><h4>Packed red blood cells (pRBC)</h4><span class="sub">Oxygen-carrying capacity</span></div></div>
+          <div class="tcard-body">
+            <div class="spec-row"><span>Contains</span><span>concentrated red cells, little plasma</span></div>
+            <div class="spec-row"><span>Effect</span><span class="dose">1 unit ↑ Hgb ≈ 1 g/dL</span></div>
+            <div class="spec-row"><span>Storage</span><span>1–6 °C, up to 42 days</span></div>
+            <p class="mt16"><strong>Use it for:</strong> symptomatic anemia or acute blood loss. Common restrictive trigger Hgb &lt; 7 g/dL (&lt; 8 in many cardiac patients).</p>
+            <div class="callout callout--pitfall"><span class="tag tag--pitfall">Pitfall</span><p>Don’t transfuse treatable iron deficiency or a stable, asymptomatic patient above threshold, and never use blood as a volume expander.</p></div>
+            <div class="callout callout--pearl"><span class="tag tag--pearl">Teaching pearl</span><p>“Why give two when one will do?” Transfuse <strong>one unit, then reassess</strong>.</p></div>
+          </div></div>
+        <div class="tcard"><div class="tcard-head"><div><h4>Platelets</h4><span class="sub">Primary hemostasis</span></div></div>
+          <div class="tcard-body">
+            <div class="spec-row"><span>One dose</span><span>1 apheresis unit ≈ pool of 4–6</span></div>
+            <div class="spec-row"><span>Effect</span><span class="dose">↑ platelets ≈ 30–50 ×10⁹/L</span></div>
+            <div class="spec-row"><span>Storage</span><span>room temp, agitated, 5–7 days</span></div>
+            <p class="mt16"><strong>Use it for:</strong> thrombocytopenia or platelet dysfunction with bleeding/risk. Prophylaxis &lt; 10×10⁹/L; &lt; 50 for most procedures; &lt; 100 for CNS/neurosurgery.</p>
+            <div class="callout callout--pitfall"><span class="tag tag--pitfall">Pitfall</span><p>Avoid in <strong>TTP</strong> and <strong>HIT</strong> (can fuel thrombosis) unless there is life-threatening bleeding.</p></div>
+            <div class="callout callout--adv"><span class="tag tag--adv">Advanced pearl</span><p>Stored at room temperature → platelets carry the <strong>highest bacterial-sepsis risk</strong> of any component.</p></div>
+          </div></div>
+        <div class="tcard"><div class="tcard-head"><div><h4>Fresh frozen plasma (FFP)</h4><span class="sub">Many factors at once</span></div></div>
+          <div class="tcard-body">
+            <div class="spec-row"><span>Contains</span><span>all coagulation factors</span></div>
+            <div class="spec-row"><span>Dose</span><span class="dose">10–15 mL/kg</span></div>
+            <div class="spec-row"><span>Compatibility</span><span>ABO plasma rules (AB = donor)</span></div>
+            <p class="mt16"><strong>Use it for:</strong> bleeding with <em>multiple</em> factor deficiencies — DIC, liver disease, massive transfusion; warfarin reversal when PCC is unavailable.</p>
+            <div class="callout callout--pitfall"><span class="tag tag--pitfall">Pitfall</span><p>Not a volume expander, and not the best warfarin reversal when <strong>4-factor PCC</strong> is available (PCC is faster and smaller volume). Don’t “fix” a mildly high INR in a non-bleeding patient before a low-risk procedure.</p></div>
+          </div></div>
+        <div class="tcard"><div class="tcard-head"><div><h4>Cryoprecipitate</h4><span class="sub">The fibrinogen product</span></div></div>
+          <div class="tcard-body">
+            <div class="spec-row"><span>Contains</span><span>fibrinogen, FVIII, vWF, FXIII</span></div>
+            <div class="spec-row"><span>Trigger</span><span class="dose">fibrinogen &lt; 100–150 mg/dL</span></div>
+            <div class="spec-row"><span>Volume</span><span>small (pooled)</span></div>
+            <p class="mt16"><strong>Use it for:</strong> low fibrinogen — DIC, massive transfusion, obstetric hemorrhage.</p>
+            <div class="callout callout--dnc"><span class="tag tag--dnc">Do not confuse</span><p>Cryo is <strong>not</strong> a general clotting-factor source. Need broad factors → FFP. Need a specific factor → its concentrate.</p></div>
+          </div></div>
+      </div>
+
+      <h3 class="mt24 reveal">Modified products — who needs the “special” blood</h3>
+      <div class="reveal">
+        <details class="acc"><summary><span class="dot" style="background:var(--accent)"></span>Leukoreduced — fewer white cells<span class="chev"></span></summary>
+          <div class="acc-body"><p>Most blood is now leukoreduced by default. Reduces <strong>febrile non-hemolytic reactions</strong>, HLA alloimmunization, and CMV transmission.</p></div></details>
+        <details class="acc"><summary><span class="dot" style="background:var(--coag)"></span>Irradiated — prevents TA-GVHD<span class="chev"></span></summary>
+          <div class="acc-body"><p>Gamma irradiation disables donor lymphocytes so they can’t attack the recipient. For the <strong>severely immunocompromised, neonates, and directed/relative donations</strong> (HLA-similar blood is paradoxically more dangerous here).</p></div></details>
+        <details class="acc"><summary><span class="dot" style="background:var(--info)"></span>CMV-safe — for CMV-negative at-risk patients<span class="chev"></span></summary>
+          <div class="acc-body"><p>CMV-seronegative units or leukoreduction protect CMV-negative pregnant patients, transplant recipients, and neonates from transfusion-transmitted CMV.</p></div></details>
+        <details class="acc"><summary><span class="dot" style="background:var(--aph)"></span>Washed — plasma proteins removed<span class="chev"></span></summary>
+          <div class="acc-body"><p>Saline-washing removes plasma. For <strong>IgA-deficient patients with anti-IgA</strong> or severe recurrent allergic/anaphylactic reactions.</p></div></details>
+      </div>
+
+      <h3 class="mt24 reveal">Product comparison at a glance</h3>
+      <div class="table-wrap reveal">
+        <table class="cmp">
+          <thead><tr><th>Product</th><th>Key content</th><th>Core indication</th><th>Typical effect / trigger</th><th>One safety pearl</th></tr></thead>
+          <tbody>
+            <tr><td>pRBC</td><td>red cells</td><td>symptomatic anemia, blood loss</td><td><span class="pill">+1 g/dL Hgb</span></td><td>one unit, then reassess</td></tr>
+            <tr><td>Platelets</td><td>platelets</td><td>thrombocytopenia / dysfunction + bleeding</td><td><span class="pill">prophylaxis &lt;10k</span></td><td>highest sepsis risk; avoid in TTP/HIT</td></tr>
+            <tr><td>FFP</td><td>all factors</td><td>multi-factor deficiency, DIC, liver</td><td><span class="pill">10–15 mL/kg</span></td><td>not a volume expander</td></tr>
+            <tr><td>Cryoprecipitate</td><td>fibrinogen, FVIII, vWF, FXIII</td><td>low fibrinogen (DIC, OB hemorrhage)</td><td><span class="pill">fib &lt;100–150</span></td><td>the fibrinogen product, not a cure-all</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="mt24 reveal">Transfusion reactions — recognize the buckets, act fast</h3>
+      <div class="callout callout--next reveal"><span class="tag tag--next">What to do next — every reaction</span><p><strong>Stop the transfusion.</strong> Keep the line open with normal saline, check the patient and the unit identification, support vital signs, and call the blood bank. Stopping first is never wrong.</p></div>
+      <div class="grid-auto reveal mt16">
+        <div class="tcard"><div class="tcard-head"><h4>Acute hemolytic (AHTR)</h4></div><div class="tcard-body"><p>ABO incompatibility — almost always a clerical/ID error. Fever, flank/back pain, dark urine, hypotension, DIC. <em>Most feared, fully preventable.</em></p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Febrile non-hemolytic</h4></div><div class="tcard-body"><p>Most <strong>common</strong>. Fever/chills from cytokines and donor WBCs, no hemolysis. Leukoreduction prevents most.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Allergic → anaphylactic</h4></div><div class="tcard-body"><p>Mild = hives (antihistamine, often resume). Severe = anaphylaxis, classically <strong>IgA-deficient</strong> recipients → washed products + epinephrine.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>TACO</h4></div><div class="tcard-body"><p>Circulatory <strong>overload</strong>: dyspnea, hypertension, pulmonary edema. Transfuse slowly, diurese. Think elderly/cardiac/renal.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>TRALI</h4></div><div class="tcard-body"><p>Acute lung injury within 6 h: hypoxemia, bilateral infiltrates, <strong>normal</strong> filling pressures. Leading cause of transfusion death. Supportive care.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Septic / bacterial</h4></div><div class="tcard-body"><p>High fever, rigors, shock soon after starting — think <strong>platelets</strong> (stored warm). Stop, cultures, broad antibiotics.</p></div></div>
+      </div>
+      <div class="callout callout--dnc reveal"><span class="tag tag--dnc">Do not confuse — TACO vs TRALI</span><p><strong>TACO</strong> is too much volume: hypertensive, responds to diuretics. <strong>TRALI</strong> is lung injury: normal/low pressures, within 6 hours, supported not diuresed. Same breathless patient — opposite mechanism and management.</p></div>
+      <div class="callout callout--adv reveal"><span class="tag tag--adv">Advanced pearl</span><p><strong>TA-GVHD</strong> (donor lymphocytes attack the host) and <strong>delayed hemolytic</strong> reactions are rarer. TA-GVHD is prevented by <strong>irradiation</strong>; delayed hemolysis appears days later as a quietly falling hemoglobin with a positive DAT.</p></div>
+
+      <h3 class="mt24 reveal">Massive transfusion — the high-level idea</h3>
+      <div class="surface reveal">
+        <p>When a patient is hemorrhaging (≈ one blood volume or ≥ 10 units in 24 h), institutions activate a <strong>massive transfusion protocol</strong> and resuscitate in a balanced <strong>1 : 1 : 1</strong> ratio of red cells : plasma : platelets to avoid dilutional coagulopathy.</p>
+        <div class="callout callout--pearl"><span class="tag tag--pearl">Teaching pearl</span><p>Watch the metabolic cost: stored blood’s citrate binds calcium → <strong>hypocalcemia</strong> (give calcium), plus <strong>hyperkalemia</strong> and <strong>hypothermia</strong> (warm the fluids). Remember the lethal triad: cold, acidotic, coagulopathic.</p></div>
+      </div>
+
+      <h3 class="mt24 reveal">Beginner FAQ</h3>
+      <div class="reveal">
+        <details class="acc"><summary>Why screen for antibodies if we already know the blood type?<span class="chev"></span></summary><div class="acc-body"><p>ABO/Rh isn’t the whole story. Prior pregnancies or transfusions can create antibodies to <em>other</em> red-cell antigens (Kell, Duffy, Kidd…). The screen finds those so the lab can pick units the patient won’t hemolyze.</p></div></details>
+        <details class="acc"><summary>If O-negative is universal, why not give it to everyone?<span class="chev"></span></summary><div class="acc-body"><p>O-negative is scarce. It’s reserved for emergencies and for women of child-bearing potential. Everyone else gets type-specific blood to conserve the universal supply.</p></div></details>
+        <details class="acc"><summary>Does a patient consent for every transfusion?<span class="chev"></span></summary><div class="acc-body"><p>Yes — transfusion is a procedure with risks and benefits. Informed consent (outside true emergencies) is standard, and the bedside ID check at hang time is the single most important safety step.</p></div></details>
+      </div>
+
+      <h3 class="mt24 reveal">Try it — bedside case</h3>
+      <div class="reveal" data-case-slot="blood"></div>
+      <h3 class="mt24 reveal">Quick checkpoint</h3>
+      <div class="reveal" data-checkpoint="blood"></div>
+    </section>
+
+    <!-- ===== PILLAR 2 · COAGULATION ===== -->
+    <section id="coagulation" class="section" data-section="Coagulation" aria-labelledby="coag-h">
+      <div class="section-head reveal">
+        <span class="kicker kicker--coag">Pillar 02 · Coagulation testing &amp; interpretation</span>
+        <h2 id="coag-h">Coagulation: a way of thinking, before a list of tests.</h2>
+        <p class="section-sub">Most students try to memorize the clotting cascade and freeze at the bedside. Flip it: start with three questions about the <em>patient</em>, then let a small number of tests localize the problem. This is the framework to keep.</p>
+      </div>
+
+      <h3 class="reveal">The three questions that organize everything</h3>
+      <div class="grid-3 reveal">
+        <div class="tcard"><div class="tcard-head"><div><span class="sub">01</span><h4>Bleeding or clotting?</h4></div></div><div class="tcard-body"><p>Is the patient <strong>bleeding</strong> (deficiency / dysfunction) or <strong>clotting</strong> (thrombophilia)? They point to opposite work-ups. Most inpatient coagulation questions are about bleeding or an abnormal screening test.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><div><span class="sub">02</span><h4>Inherited or acquired?</h4></div></div><div class="tcard-body"><p><strong>Inherited</strong> = lifelong, family history, since childhood (hemophilia, vWD). <strong>Acquired</strong> = new, sick patient, on drugs (DIC, liver, warfarin, heparin). Acquired is far more common on the wards.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><div><span class="sub">03</span><h4>Screening or specialized?</h4></div></div><div class="tcard-body"><p><strong>Screening</strong> tests (PT, aPTT, platelets, fibrinogen) localize the problem. <strong>Specialized</strong> tests (mixing study, factor assays, LA panel) confirm it. Screen first; send special tests with a hypothesis.</p></div></div>
+      </div>
+
+      <h3 class="mt24 reveal">What the screening tests actually measure</h3>
+      <div class="surface reveal">
+        <div class="tabs" role="tablist" aria-label="Screening tests">
+          <button class="tab is-active" role="tab" data-tab="t-pt">PT / INR</button>
+          <button class="tab" role="tab" data-tab="t-aptt">aPTT</button>
+          <button class="tab" role="tab" data-tab="t-fib">Fibrinogen</button>
+          <button class="tab" role="tab" data-tab="t-dd">D-dimer</button>
+          <button class="tab" role="tab" data-tab="t-plt">Platelets</button>
+        </div>
+        <div class="tabpane is-active" data-pane="t-pt">
+          <p class="tcard-body"><strong>PT</strong> measures the <strong>extrinsic + common</strong> pathway (factors VII → X, V, II, fibrinogen). The <strong>INR</strong> standardizes the PT so warfarin can be monitored anywhere.</p>
+          <div class="callout callout--pattern"><span class="tag tag--pattern">Clinical pattern</span><p>Prolonged PT: <strong>warfarin</strong>, vitamin K deficiency, liver disease, early/mild — because factor VII has the shortest half-life, the PT moves first.</p></div>
+        </div>
+        <div class="tabpane" data-pane="t-aptt">
+          <p class="tcard-body"><strong>aPTT</strong> measures the <strong>intrinsic + common</strong> pathway (XII, XI, IX, VIII → X, V, II, fibrinogen).</p>
+          <div class="callout callout--pattern"><span class="tag tag--pattern">Clinical pattern</span><p>Prolonged aPTT: <strong>heparin</strong>, hemophilia A (VIII) or B (IX), von Willebrand disease, or a <strong>lupus anticoagulant</strong>. The next move is almost always a mixing study.</p></div>
+        </div>
+        <div class="tabpane" data-pane="t-fib">
+          <p class="tcard-body"><strong>Fibrinogen</strong> is the final substrate — the brick that thrombin turns into a clot. It falls when it’s consumed or not made.</p>
+          <div class="callout callout--pattern"><span class="tag tag--pattern">Clinical pattern</span><p>Low fibrinogen → <strong>DIC</strong>, severe liver disease, or obstetric hemorrhage. A low fibrinogen in a bleeding patient is a cue for <strong>cryoprecipitate</strong>.</p></div>
+        </div>
+        <div class="tabpane" data-pane="t-dd">
+          <p class="tcard-body"><strong>D-dimer</strong> is a fibrin breakdown product — evidence that clot has formed and been lysed. Very <strong>sensitive, not specific</strong>.</p>
+          <div class="callout callout--pitfall"><span class="tag tag--pitfall">Pitfall</span><p>A high D-dimer alone proves little — it rises in VTE, DIC, infection, surgery, pregnancy, and cancer. It’s most useful when <em>normal</em> to help rule out clot in a low-risk patient.</p></div>
+        </div>
+        <div class="tabpane" data-pane="t-plt">
+          <p class="tcard-body">The <strong>platelet count</strong> is a number from the CBC; it says nothing about whether those platelets <em>work</em>.</p>
+          <div class="callout callout--dnc"><span class="tag tag--dnc">Do not confuse</span><p>Platelet <strong>count</strong> ≠ platelet <strong>function</strong>. A normal count with mucocutaneous bleeding (aspirin, uremia, von Willebrand disease) is a <em>functional</em> problem that the CBC will never show.</p></div>
+        </div>
+      </div>
+
+      <h3 class="mt24 reveal">The pathway picture (just enough to localize)</h3>
+      <div class="grid-3 reveal">
+        <div class="tcard"><div class="tcard-head"><h4>Intrinsic → aPTT</h4></div><div class="tcard-body"><p class="dose">XII · XI · IX · VIII</p><p>A long aPTT with a normal PT points here.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Extrinsic → PT</h4></div><div class="tcard-body"><p class="dose">VII</p><p>A long PT with a normal aPTT points here (or early warfarin/vit K).</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Common → both</h4></div><div class="tcard-body"><p class="dose">X · V · II · fibrinogen</p><p>Both prolonged → common pathway, DIC, liver, or strong anticoagulation.</p></div></div>
+      </div>
+
+      <h3 class="mt24 reveal">Approach to a prolonged screening test</h3>
+      <div class="algo reveal">
+        <div class="algo-node"><span class="algo-step">1</span><div><h5>Rule out the artifact first</h5><p>Before chasing a coagulopathy, exclude a <strong>preanalytic</strong> cause: an underfilled citrate tube, a heparin-contaminated line draw, a clotted or hemolyzed sample. The most common “coagulopathy” on the wards is a bad tube.</p></div></div>
+        <div class="algo-node"><span class="algo-step">2</span><div><h5>Localize with the pattern</h5><p><strong>Isolated long PT</strong> → factor VII, early warfarin/vitamin K deficiency, early liver disease. <strong>Isolated long aPTT</strong> → hemophilia, vWD, heparin, lupus anticoagulant. <strong>Both long</strong> → common pathway, DIC, liver, vitamin K deficiency, or strong anticoagulation.</p></div></div>
+        <div class="algo-node"><span class="algo-step">3</span><div><h5>For a long aPTT, do a mixing study</h5><p>Mix the patient’s plasma 1 : 1 with normal plasma and repeat the test. This single step splits the two big categories.</p></div></div>
+        <div class="algo-branch">
+          <div class="algo-node b-corrects"><span class="branch-tag">Corrects → deficiency</span><div><p>The normal plasma supplied the missing factor. Think <strong>factor deficiency</strong> (hemophilia, vWD). Confirm with <strong>factor assays</strong>.</p></div></div>
+          <div class="algo-node b-inhibits"><span class="branch-tag">Doesn’t correct → inhibitor</span><div><p>Something is neutralizing the factor even in normal plasma. Think <strong>inhibitor</strong> — a factor antibody or a <strong>lupus anticoagulant</strong>.</p></div></div>
+        </div>
+      </div>
+      <div class="callout callout--pearl reveal"><span class="tag tag--pearl">Teaching pearl</span><p>Memorize this one line and you can reason through most consults: <strong>“Long aPTT? Mix it. Corrects = deficiency. Doesn’t correct = inhibitor.”</strong></p></div>
+
+      <h3 class="mt24 reveal">Pattern-recognition cards</h3>
+      <div class="grid-auto reveal">
+        <div class="tcard"><div class="tcard-head"><h4>DIC</h4></div><div class="tcard-body"><p><strong>Everything consumed.</strong> ↓ platelets, ↓ fibrinogen, ↑ PT/aPTT, ↑↑ D-dimer, schistocytes. Driven by sepsis, malignancy, trauma, obstetric catastrophe. Treat the cause; support if bleeding.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Liver disease</h4></div><div class="tcard-body"><p>Failing synthesis of most factors → PT rises first. <strong>Factor VIII is often normal/high</strong> (made by endothelium) — that’s how you separate it from DIC.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Vitamin K deficiency / warfarin</h4></div><div class="tcard-body"><p>Factors <strong>II, VII, IX, X</strong> need vitamin K. PT/INR prolongs first (factor VII). Causes: poor intake, antibiotics, malabsorption, warfarin. Corrects with vitamin K.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Heparin</h4></div><div class="tcard-body"><p>Unfractionated heparin prolongs the <strong>aPTT</strong>. LMWH is monitored by <strong>anti-Xa</strong>, not aPTT. A suddenly long aPTT? Check for a heparin line draw.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Hemophilia A / B</h4></div><div class="tcard-body"><p>X-linked deficiency of <strong>factor VIII (A)</strong> or <strong>IX (B)</strong>. Isolated long aPTT, normal PT, <strong>corrects</strong> on mixing. Deep bleeds — joints, muscles.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>von Willebrand disease</h4></div><div class="tcard-body"><p>Most common inherited bleeding disorder. <strong>Mucocutaneous</strong> bleeding; vWF also carries factor VIII, so the aPTT can be mildly long. Confirm with vWF antigen + activity.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Lupus anticoagulant</h4></div><div class="tcard-body"><p>The paradox: a long aPTT that <strong>doesn’t correct</strong> on mixing, yet the patient <strong>clots</strong>, not bleeds. Confirm with dRVVT + antiphospholipid antibodies.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Thrombocytopenia buckets</h4></div><div class="tcard-body"><p>Three mechanisms: <strong>↓ production</strong> (marrow), <strong>↑ destruction</strong> (ITP, TTP, HIT, DIC), or <strong>sequestration</strong> (splenomegaly). The mechanism, not the number, drives action.</p></div></div>
+      </div>
+      <div class="callout callout--dnc reveal"><span class="tag tag--dnc">Do not confuse — the lupus anticoagulant paradox</span><p>It <em>prolongs</em> a lab test (in-vitro phospholipid effect) but <em>promotes</em> clotting in the patient (in vivo). Long aPTT does not always mean a bleeding risk — context decides.</p></div>
+
+      <h3 class="mt24 reveal">Specialized tests &amp; specimen quality</h3>
+      <div class="grid-2 reveal">
+        <div class="tcard"><div class="tcard-head"><h4>When the special tests get sent</h4></div><div class="tcard-body">
+          <p><strong>Mixing study</strong> — deficiency vs inhibitor. <strong>Factor assays</strong> — quantify a specific factor once localized. <strong>LA / antiphospholipid panel</strong> — dRVVT, anticardiolipin, β2-glycoprotein-I; needs persistence ≥ 12 weeks to call APS.</p>
+          <div class="callout callout--adv"><span class="tag tag--adv">Advanced pearl</span><p>An acquired <strong>factor inhibitor</strong> is titrated in <em>Bethesda units</em>; thromboelastography (TEG/ROTEM) gives a whole-blood, real-time view in trauma and the OR. Specialist territory — recognize the names.</p></div>
+        </div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Specimen pitfalls that fake a coagulopathy</h4></div><div class="tcard-body">
+          <div class="spec-row"><span>Underfilled citrate tube</span><span>falsely ↑ PT/aPTT</span></div>
+          <div class="spec-row"><span>Heparin line contamination</span><span>falsely ↑ aPTT</span></div>
+          <div class="spec-row"><span>Clotted / hemolyzed sample</span><span>unreliable result</span></div>
+          <div class="spec-row"><span>Severe polycythemia</span><span>wrong citrate ratio → ↑ PT</span></div>
+          <p class="mt16 muted-note">Rule: a surprising result in a patient who looks fine deserves a redraw before a work-up.</p>
+        </div></div>
+      </div>
+
+      <h3 class="mt24 reveal">Try it — interpret the panel</h3>
+      <div class="reveal" data-case-slot="coag"></div>
+      <h3 class="mt24 reveal">Quick checkpoint</h3>
+      <div class="reveal" data-checkpoint="coag"></div>
+    </section>
+
+    <!-- ===== PILLAR 3 · APHERESIS ===== -->
+    <section id="apheresis" class="section" data-section="Apheresis" aria-labelledby="aph-h">
+      <div class="section-head reveal">
+        <span class="kicker kicker--aph">Pillar 03 · Apheresis medicine</span>
+        <h2 id="aph-h">Apheresis: selectively remove or exchange one part of the blood.</h2>
+        <p class="section-sub">A machine separates blood into its components, the problematic part is removed or swapped out, and the rest is returned. That one sentence covers everything below. This is the transfusion service’s procedural and consult arm.</p>
+      </div>
+
+      <div class="grid-2 reveal">
+        <div class="tcard"><div class="tcard-head"><div><h4>Therapeutic apheresis</h4><span class="sub">Treating the patient</span></div></div><div class="tcard-body"><p>Remove a <strong>pathologic component</strong> from a sick patient — an antibody, a paraprotein, sickled red cells, or a dangerous excess of cells — and return the rest.</p></div></div>
+        <div class="tcard"><div class="tcard-head"><div><h4>Donor apheresis</h4><span class="sub">Collecting from a healthy donor</span></div></div><div class="tcard-body"><p>Collect a <strong>single component</strong> from a healthy donor — platelets, plasma, double red cells, granulocytes, or stem cells — and return everything else. Same machine, opposite goal.</p></div></div>
+      </div>
+
+      <h3 class="mt24 reveal">The core modalities — match the tool to the problem</h3>
+      <div class="grid-auto reveal">
+        <div class="tcard"><div class="tcard-head"><div><h4>Plasma exchange (TPE)</h4><span class="sub">Removes a bad plasma factor</span></div></div><div class="tcard-body"><p>Removes the patient’s plasma — and whatever pathologic <strong>antibody, immune complex, or paraprotein</strong> it carries — and replaces it with albumin or donor plasma.</p><p class="muted-note">Problem solved: “a harmful molecule is circulating in the plasma.”</p></div></div>
+        <div class="tcard"><div class="tcard-head"><div><h4>Red cell exchange (RCE)</h4><span class="sub">Swaps red cells</span></div></div><div class="tcard-body"><p>Removes the patient’s red cells and replaces them with donor red cells — rapidly lowering <strong>HbS%</strong> in sickle cell disease without causing hyperviscosity or iron overload.</p><p class="muted-note">Problem solved: “these red cells are dangerous and must be replaced.”</p></div></div>
+        <div class="tcard"><div class="tcard-head"><div><h4>Cytapheresis</h4><span class="sub">Removes excess cells</span></div></div><div class="tcard-body"><p><strong>Leukapheresis</strong> for symptomatic hyperleukocytosis (leukostasis in acute leukemia); <strong>plateletpheresis</strong> for symptomatic extreme thrombocytosis.</p><p class="muted-note">Problem solved: “there are too many of one cell, right now.”</p></div></div>
+        <div class="tcard"><div class="tcard-head"><div><h4>HPC / stem-cell collection</h4><span class="sub">Collects progenitor cells</span></div></div><div class="tcard-body"><p>After mobilization (G-CSF ± plerixafor), collect <strong>CD34+ hematopoietic progenitor cells</strong> from the blood for transplant — autologous or allogeneic.</p><p class="muted-note">Problem solved: “we need stem cells for a transplant.”</p></div></div>
+      </div>
+
+      <h3 class="mt24 reveal">The can’t-miss consult: TTP</h3>
+      <div class="surface reveal" style="border-left:2px solid var(--blood)">
+        <div class="lead-row"><span class="tag tag--why">Why it matters</span><span class="q-diff integrative">emergency</span></div>
+        <p><strong>Thrombotic thrombocytopenic purpura</strong> is a deficiency of <strong>ADAMTS13</strong> (usually an autoantibody) → ultra-large von Willebrand multimers → platelet microthrombi everywhere. Recognize it as <strong>microangiopathic hemolytic anemia + thrombocytopenia</strong> with no better explanation — don’t wait for the full “pentad.”</p>
+        <div class="labs">
+          <span class="lab lo"><span class="k">Plt</span><span class="v">18 ×10⁹/L</span></span>
+          <span class="lab hi"><span class="k">LDH</span><span class="v">↑↑</span></span>
+          <span class="lab lo"><span class="k">Haptoglobin</span><span class="v">↓</span></span>
+          <span class="lab"><span class="k">Schistocytes</span><span class="v">present</span></span>
+          <span class="lab"><span class="k">PT/aPTT</span><span class="v">normal</span></span>
+          <span class="lab"><span class="k">DAT</span><span class="v">negative</span></span>
+        </div>
+        <div class="callout callout--next"><span class="tag tag--next">What to do next</span><p>Start <strong>urgent plasma exchange with plasma replacement</strong> — it removes the antibody and ultra-large multimers <em>and</em> replaces ADAMTS13. It is lifesaving and is ASFA <strong>Category I</strong>. Add steroids; caplacizumab/rituximab often follow.</p></div>
+        <div class="callout callout--pitfall"><span class="tag tag--pitfall">Pitfall</span><p>Do <strong>not</strong> transfuse platelets in TTP unless there is life-threatening bleeding — you’re adding fuel to the microthrombi.</p></div>
+        <div class="callout callout--dnc"><span class="tag tag--dnc">Do not confuse — TTP vs DIC</span><p>Both have low platelets and schistocytes. <strong>TTP: PT/aPTT and fibrinogen are normal.</strong> DIC consumes them, so PT/aPTT are prolonged and fibrinogen is low. That panel is how you tell them apart.</p></div>
+      </div>
+
+      <h3 class="mt24 reveal">Indications a student should recognize</h3>
+      <div class="table-wrap reveal">
+        <table class="cmp">
+          <thead><tr><th>Scenario</th><th>Modality</th><th>What it’s solving</th><th>ASFA-style role</th></tr></thead>
+          <tbody>
+            <tr><td>TTP</td><td>Plasma exchange (plasma)</td><td>remove anti-ADAMTS13, replace enzyme</td><td><span class="pill">Category I</span></td></tr>
+            <tr><td>Sickle: stroke / acute chest</td><td>Red cell exchange</td><td>lower HbS% fast, no hyperviscosity</td><td><span class="pill">Category I</span></td></tr>
+            <tr><td>Guillain-Barré · myasthenic crisis</td><td>Plasma exchange (albumin)</td><td>remove pathogenic antibody</td><td><span class="pill">Category I</span></td></tr>
+            <tr><td>Anti-GBM (Goodpasture)</td><td>Plasma exchange</td><td>remove anti-GBM antibody</td><td><span class="pill">Category I</span></td></tr>
+            <tr><td>Hyperviscosity (Waldenström / myeloma)</td><td>Plasma exchange</td><td>remove excess paraprotein</td><td><span class="pill">Category I/II</span></td></tr>
+            <tr><td>Symptomatic hyperleukocytosis</td><td>Leukapheresis</td><td>relieve leukostasis</td><td><span class="pill">Category II/III</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout--adv reveal"><span class="tag tag--adv">Advanced pearl</span><p><strong>ASFA categories</strong> (from the <em>Journal of Clinical Apheresis</em> guidelines) rank indications I–IV: <strong>I</strong> = first-line, <strong>II</strong> = second-line, <strong>III</strong> = individualized/uncertain, <strong>IV</strong> = ineffective or harmful. You don’t need the full list — just the concept and the Category I emergencies.</p></div>
+
+      <h3 class="mt24 reveal">Replacement fluids &amp; complications</h3>
+      <div class="grid-2 reveal">
+        <div class="tcard"><div class="tcard-head"><h4>Albumin vs plasma — what goes back in</h4></div><div class="tcard-body">
+          <p>In plasma exchange you remove a patient’s plasma, so you must replace the volume.</p>
+          <div class="spec-row"><span>Albumin (5%) — default</span><span>no factors, no infectious risk</span></div>
+          <div class="spec-row"><span>Plasma (FFP)</span><span>for TTP or active bleeding</span></div>
+          <div class="callout callout--pearl"><span class="tag tag--pearl">Teaching pearl</span><p>Albumin contains <strong>no clotting factors</strong> — repeated exchanges deplete fibrinogen and immunoglobulins, so the team watches for bleeding. TTP is the classic reason to replace with <strong>plasma</strong> instead.</p></div>
+        </div></div>
+        <div class="tcard"><div class="tcard-head"><h4>Risks &amp; line issues</h4></div><div class="tcard-body">
+          <div class="spec-row"><span>Citrate → hypocalcemia</span><span>perioral/finger tingling</span></div>
+          <div class="spec-row"><span>Hypotension</span><span>fluid shifts</span></div>
+          <div class="spec-row"><span>Vascular access</span><span>large-bore/central line risks</span></div>
+          <div class="spec-row"><span>Allergic reaction</span><span>esp. plasma replacement</span></div>
+          <div class="callout callout--pattern"><span class="tag tag--pattern">Clinical pattern</span><p>Mid-procedure <strong>perioral and fingertip tingling</strong> is citrate-induced hypocalcemia — the most common apheresis complication. Slow the rate and give calcium.</p></div>
+        </div></div>
+      </div>
+
+      <div class="surface reveal mt16">
+        <h4>What a transfusion medicine physician actually does on the apheresis service</h4>
+        <ul class="ticks">
+          <li>Decides whether apheresis is even <strong>indicated</strong> (and its ASFA category) when a team pages a consult.</li>
+          <li>Chooses the <strong>modality, replacement fluid, number of procedures, and schedule</strong>.</li>
+          <li>Sorts out <strong>vascular access</strong> and monitors calcium, counts, and fibrinogen between runs.</li>
+          <li>Manages <strong>complications</strong> and hands the patient back to the primary team with a plan.</li>
+        </ul>
+      </div>
+
+      <h3 class="mt24 reveal">Try it — the consult page</h3>
+      <div class="reveal" data-case-slot="aph"></div>
+      <h3 class="mt24 reveal">Quick checkpoint</h3>
+      <div class="reveal" data-checkpoint="aph"></div>
+    </section>
+
+    <!-- ===================================================================
+         CLINICAL REFERENCE & DECISION SUPPORT
+         Ported from the TM·Coag Logger reference tools — reference only.
+         =================================================================== -->
+
+    <section id="platelet" class="section" data-section="Platelet requests" aria-labelledby="platelet-h">
+      <div class="section-head reveal">
+        <span class="kicker">Clinical reference · Decision support</span>
+        <h2 id="platelet-h">Platelet request — approval &amp; appropriateness</h2>
+        <p class="section-sub">The call you’ll field constantly. Set the indication and clinical setting, click the platelet band, and the engine checks it against standard AABB / BSH thresholds and writes an approve / not-indicated note you can copy.</p>
+      </div>
+      <div id="ref-platelet" class="reveal"></div>
+    </section>
+
+    <section id="txnreact" class="section" data-section="Transfusion reactions" aria-labelledby="txnreact-h">
+      <div class="section-head reveal">
+        <span class="kicker">Clinical reference · Decision support</span>
+        <h2 id="txnreact-h">Transfusion reaction — workup &amp; management</h2>
+        <p class="section-sub">Click the clinical signs and the clerical / DAT / ABO workup; the engine triages AHTR · FNHTR · TACO · TRALI · allergic · septic · delayed and lists the next steps. Below it, a searchable catalog of all reaction types.</p>
+      </div>
+      <div id="ref-txnreact" class="reveal"></div>
+      <h3 class="mt24 reveal">Reaction reference catalog</h3>
+      <div id="ref-txncatalog" class="reveal"></div>
+    </section>
+
+    <section id="asfa" class="section" data-section="ASFA guidelines" aria-labelledby="asfa-h">
+      <div class="section-head reveal">
+        <span class="kicker">Clinical reference · Decision support</span>
+        <h2 id="asfa-h">ASFA apheresis indications (9th ed., 2023)</h2>
+        <p class="section-sub">All 166 indications — searchable by disease, indication, or procedure, filterable by category. Click any row for the prescription details: volume treated, replacement fluid, frequency, and course.</p>
+      </div>
+      <div id="ref-asfa" class="reveal"></div>
+    </section>
+
+    <section id="bloodprep" class="section" data-section="Blood for the OR" aria-labelledby="bloodprep-h">
+      <div class="section-head reveal">
+        <span class="kicker">Clinical reference · Decision support</span>
+        <h2 id="bloodprep-h">Preparing blood for the OR (MSBOS)</h2>
+        <p class="section-sub">Pick the procedure from the HFHS surgical blood ordering schedule, set the hemoglobin, and add any alloantibodies. The tool combines the MSBOS baseline, the transfusion-likelihood adjustment, and antigen-negative donor frequencies — linkage-aware for Rh — into a crossmatch recommendation and the donor-screening burden.</p>
+      </div>
+      <div id="ref-bloodprep" class="reveal"></div>
+    </section>
+
+    <section id="antibody" class="section" data-section="Antibody panel ID" aria-labelledby="antibody-h">
+      <div class="section-head reveal">
+        <span class="kicker">Clinical reference · Decision support</span>
+        <h2 id="antibody-h">Antibody panel identification</h2>
+        <p class="section-sub">A structured workup composer plus the quick method for reading a panel — rule of three, ruling out with homozygous cells, phase / strength, and the autocontrol.</p>
+      </div>
+      <div id="ref-antibody" class="reveal"></div>
+    </section>
+
+    <section id="aphtool" class="section" data-section="Therapeutic apheresis" aria-labelledby="aphtool-h">
+      <div class="section-head reveal">
+        <span class="kicker">Clinical reference · Decision support</span>
+        <h2 id="aphtool-h">Therapeutic apheresis — consult &amp; note builder</h2>
+        <p class="section-sub">Search the ASFA tables and it auto-fills the category, grade, procedure, and a suggested course; finish the prescription and monitoring, and copy a consult or progress note.</p>
+      </div>
+      <div id="ref-apheresis" class="reveal"></div>
+    </section>
+
+    <!-- ===== CASE LAB ===== -->
+    <section id="cases" class="section" data-section="Case lab" aria-labelledby="cases-h">
+      <div class="section-head reveal">
+        <span class="kicker">Practice · Integrated cases</span>
+        <h2 id="cases-h">Case lab — reason one step at a time.</h2>
+        <p class="section-sub">Each case reveals itself in stages. Read the scenario, decide what <em>you</em> would do next, then open the discussion. These cases cross pillars the way real consults do.</p>
+      </div>
+      <div class="reveal" data-case-slot="lab"></div>
+    </section>
+
+    <!-- ===== QUIZ CENTER ===== -->
+    <section id="quiz" class="section" data-section="Quiz center" aria-labelledby="quiz-h">
+      <div class="section-head reveal">
+        <span class="kicker">Practice · Self-test</span>
+        <h2 id="quiz-h">Quiz center.</h2>
+        <p class="section-sub">Mixed review and per-pillar banks. Pick an answer for instant feedback — correct answer, why the distractors are wrong, and a teaching pearl. Scoring is in-session only.</p>
+      </div>
+      <div class="quiz-toolbar reveal">
+        <div class="filter-chips" id="quizFilters" role="group" aria-label="Filter questions">
+          <button class="chip is-active" data-filter="all">All</button>
+          <button class="chip" data-filter="blood">Blood bank</button>
+          <button class="chip" data-filter="coag">Coagulation</button>
+          <button class="chip" data-filter="aph">Apheresis</button>
+        </div>
+        <div class="scoreboard">
+          <span>Score <b id="qScore">0</b> / <b id="qAnswered">0</b></span>
+          <button class="btn btn--ghost btn--sm" id="quizReset">Reset</button>
+        </div>
+      </div>
+      <div id="quizBank" class="reveal"></div>
+    </section>
+
+    <!-- ===== GLOSSARY ===== -->
+    <section id="glossary" class="section" data-section="Glossary" aria-labelledby="gloss-h">
+      <div class="section-head reveal">
+        <span class="kicker">Reference · Cheat sheet</span>
+        <h2 id="gloss-h">Glossary &amp; quick reference.</h2>
+        <p class="section-sub">Beginner-friendly definitions. Terms with a blue edge are the <strong>must-know</strong> set — the vocabulary to be comfortable with by the end of the day.</p>
+      </div>
+      <div class="search reveal">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" id="glossSearch" placeholder="Search terms — e.g. cryoprecipitate, aPTT, ADAMTS13…" aria-label="Search glossary" />
+      </div>
+      <div class="gloss-list" id="glossList" aria-live="polite"></div>
+    </section>
+
+    <!-- ===== FINAL RECAP ===== -->
+    <section id="recap" class="section" data-section="Final recap" aria-labelledby="recap-h">
+      <div class="section-head reveal">
+        <span class="kicker">Wrap-up · Take it to the floor</span>
+        <h2 id="recap-h">Final recap — what to carry onto service.</h2>
+        <p class="section-sub">If you remember nothing else from the rotation, Eric, remember these — and the reference tools above carry the rest when you need them on call.</p>
+      </div>
+
+      <div class="recap-grid">
+        <ol class="takehome reveal">
+          <li>Every safe transfusion begins with <strong>correct patient identification</strong> at the bedside — the deadliest reaction (ABO hemolysis) is a preventable clerical error.</li>
+          <li><strong>O</strong> is the universal red-cell donor; <strong>AB</strong> is the universal plasma donor — opposite answers for opposite products.</li>
+          <li>Transfuse <strong>one unit of red cells, then reassess</strong>; default to a restrictive trigger around Hgb 7 g/dL.</li>
+          <li>Platelets sit at room temperature → <strong>highest sepsis risk</strong>; avoid them in TTP and HIT unless there is life-threatening bleeding.</li>
+          <li><strong>FFP</strong> replaces many factors (DIC, liver, massive transfusion); <strong>cryoprecipitate</strong> is the fibrinogen product.</li>
+          <li>Any reaction: <strong>stop the transfusion</strong>, keep saline running, recheck identification, call the blood bank.</li>
+          <li><strong>TACO</strong> = volume overload (hypertensive, diurese); <strong>TRALI</strong> = lung injury (normal pressures, within 6 h, support).</li>
+          <li>Coagulation starts with three questions: <strong>bleeding vs clotting, inherited vs acquired, screening vs specialized</strong>.</li>
+          <li><strong>PT</strong> = extrinsic/common (warfarin, vitamin K, liver); <strong>aPTT</strong> = intrinsic/common (heparin, hemophilia, vWD, lupus anticoagulant).</li>
+          <li><strong>Long aPTT? Mix it.</strong> Corrects = deficiency; doesn’t correct = inhibitor.</li>
+          <li><strong>DIC</strong> consumes everything (low platelets &amp; fibrinogen, high D-dimer, long PT/aPTT); <strong>liver</strong> keeps factor VIII normal.</li>
+          <li>Platelet <strong>count ≠ function</strong> — normal count with mucosal bleeding suggests dysfunction (aspirin, uremia, vWD).</li>
+          <li><strong>Rule out the bad tube</strong> before chasing a coagulopathy.</li>
+          <li><strong>Apheresis</strong> removes or exchanges one component; replacement is <strong>albumin by default, plasma for TTP</strong>.</li>
+          <li><strong>TTP</strong> = microangiopathic hemolysis + thrombocytopenia with a <em>normal</em> coagulation panel → <strong>urgent plasma exchange</strong>, and don’t give platelets.</li>
+        </ol>
+
+        <div class="recap-side">
+          <div class="surface reveal">
+            <h4>How to sound smart on rounds</h4>
+            <ul class="rounds-list">
+              <li>Before a second unit — has the first one been reassessed?</li>
+              <li>This is TACO, not TRALI: he’s hypertensive and the timing fits volume.</li>
+              <li>Isolated prolonged aPTT — I’d send a mixing study first.</li>
+              <li>Low fibrinogen and platelets with a high D-dimer — that’s a consumptive picture; think DIC.</li>
+              <li>MAHA with a normal coag panel — let’s rule out TTP and call transfusion medicine.</li>
+            </ul>
+          </div>
+          <div class="surface reveal how-card--accent">
+            <h4>Good questions to ask on service</h4>
+            <ul class="ask-list">
+              <li>What did the antibody screen find, and how does it change which units we can give?</li>
+              <li>Would 4-factor PCC be faster than plasma to reverse this INR?</li>
+              <li>What ASFA category is this apheresis indication, and what replacement fluid are we using?</li>
+              <li>Does this immunocompromised patient need irradiated products?</li>
+              <li>Is this thrombocytopenia from production, destruction, or sequestration?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="surface reveal mt24" style="text-align:center">
+        <p class="big-quote" style="margin:0 auto; max-width:46ch">You came in knowing anemia, bleeding, and thrombosis. You’re leaving able to <em>run</em> the blood bank service — foundations, decisions, and the tools to back them. Welcome to the residency, Eric.</p>
+        <div class="hero-actions" style="justify-content:center; margin-bottom:0">
+          <a class="btn btn--primary" href="#start">Back to the top</a>
+          <a class="btn btn--ghost" href="#quiz">Re-test in the quiz center</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p><strong>Transfusion Medicine &amp; Blood Bank — Resident Reference.</strong> Henry Ford Pathology Residency · built for Eric.</p>
+      <p class="muted-note">Educational and decision-support reference for a trained resident/physician — not a clinical protocol. The MSBOS is institution-specific (HFHS PCR-PALM-TRM-5.050); ASFA tables follow the 9th edition (2023); antigen frequencies are population estimates. Verify against current institutional policy and the source documents before acting on a patient; the attending / blood bank physician remains the final decision-maker.</p>
+    </footer>
+  </main>
+</div>
+
+<button class="to-top" id="toTop" aria-label="Back to top" hidden>↑</button>
+
+<script id="app">
+"use strict";
+(function(){
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const KEYS = ['A','B','C','D','E'];
+const PILLAR_NAME = { blood:'Blood bank', coag:'Coagulation', aph:'Apheresis' };
+
+/* ============================================================
+   DATA — QUESTIONS
+   ============================================================ */
+const QUESTIONS = [
+  { id:'b1', pillar:'blood', diff:'easy',
+    stem:'A 22-year-old woman arrives hypotensive and bleeding after a crash. There is no blood type on file and she is exsanguinating. What do you release first?',
+    opts:['O-negative red cells (emergency release)','AB-positive red cells','Type-specific blood after a full crossmatch','The patient’s own banked autologous units'],
+    answer:0,
+    explain:'With no time to type, give uncrossmatched O red cells — O-negative for a woman of child-bearing potential — plus AB plasma. Lab testing catches up afterward.',
+    wrong:'AB red cells are the universal recipient, not donor. A full crossmatch takes too long in hemorrhage, and she has no autologous units.',
+    pearl:'O is the universal red-cell donor; reserve scarce O-negative for emergencies and child-bearing-age women.' },
+  { id:'b2', pillar:'blood', diff:'easy',
+    stem:'Which blood group is the universal plasma donor?',
+    opts:['O','A','B','AB'],
+    answer:3,
+    explain:'AB plasma contains neither anti-A nor anti-B antibodies, so it can be given to any recipient.',
+    wrong:'O is the universal RED-CELL donor — its plasma actually has both antibodies, so it is the worst plasma donor.',
+    pearl:'Plasma compatibility is the mirror image of red cells: AB donates plasma to everyone; O receives plasma from everyone.' },
+  { id:'b3', pillar:'blood', diff:'easy',
+    stem:'About how much will one unit of packed red cells raise an average adult’s hemoglobin?',
+    opts:['~0.3 g/dL','~1 g/dL','~3 g/dL','~5 g/dL'],
+    answer:1,
+    explain:'One unit raises hemoglobin by roughly 1 g/dL (hematocrit ~3%).',
+    wrong:'0.3 and 3–5 g/dL over- or under-estimate the effect of a single standard unit.',
+    pearl:'“Why give two when one will do?” — transfuse one unit and reassess before ordering more.' },
+  { id:'b4', pillar:'blood', diff:'moderate',
+    stem:'A bleeding patient in DIC has a fibrinogen of 80 mg/dL. Which product most directly corrects this?',
+    opts:['Cryoprecipitate','Packed red blood cells','Platelets','Normal saline bolus'],
+    answer:0,
+    explain:'Cryoprecipitate is the concentrated fibrinogen product (also FVIII, vWF, FXIII) and is the targeted choice for hypofibrinogenemia.',
+    wrong:'Red cells and saline do nothing for fibrinogen; platelets address counts, not fibrinogen.',
+    pearl:'Low fibrinogen in a bleeding patient → think cryoprecipitate.' },
+  { id:'b5', pillar:'blood', diff:'moderate',
+    stem:'Ten minutes into a red-cell transfusion a patient develops fever, flank pain, hypotension, and dark urine. Your first action?',
+    opts:['Give acetaminophen and continue','Stop the transfusion immediately','Slow the rate and observe','Give a diuretic'],
+    answer:1,
+    explain:'This is an acute hemolytic (ABO) reaction — usually a clerical error. Stop the transfusion at once, keep the line open with saline, recheck identification, and notify the blood bank.',
+    wrong:'Continuing or merely slowing delivers more incompatible blood; a diuretic does not address the hemolysis and delays the essential first step.',
+    pearl:'For ANY suspected reaction, stopping the transfusion first is never the wrong move.' },
+  { id:'b6', pillar:'blood', diff:'moderate',
+    stem:'An elderly patient with heart failure becomes dyspneic and hypertensive with pulmonary edema after 2 quick units. Most likely reaction?',
+    opts:['TRALI','Anaphylaxis','TACO (circulatory overload)','Acute hemolytic reaction'],
+    answer:2,
+    explain:'Hypertension, raised filling pressures, and pulmonary edema after rapid/large-volume transfusion in a cardiac patient is classic TACO.',
+    wrong:'TRALI shows NORMAL filling pressures; anaphylaxis brings hypotension and urticaria; hemolysis brings fever and dark urine.',
+    pearl:'TACO is too much volume (diurese, transfuse slowly); TRALI is lung injury (support).' },
+  { id:'b7', pillar:'blood', diff:'integrative',
+    stem:'A stem-cell transplant recipient needs red cells. Which modification prevents transfusion-associated graft-versus-host disease?',
+    opts:['Leukoreduction','Irradiation','Washing','CMV-negative selection'],
+    answer:1,
+    explain:'Gamma irradiation disables donor lymphocytes so they cannot engraft and attack the host — the mechanism of TA-GVHD.',
+    wrong:'Leukoreduction lowers febrile reactions/CMV; washing removes plasma proteins; CMV-negative units prevent CMV — none reliably prevents TA-GVHD.',
+    pearl:'Severely immunocompromised, neonates, and directed/relative donations need IRRADIATED products.' },
+  { id:'b8', pillar:'blood', diff:'moderate',
+    stem:'An IgA-deficient patient had anaphylaxis with a prior transfusion. Which product is safest next time?',
+    opts:['Irradiated red cells','Leukoreduced red cells','Washed red cells','CMV-negative red cells'],
+    answer:2,
+    explain:'Washing removes residual plasma proteins (including IgA), preventing anti-IgA–mediated anaphylaxis. IgA-deficient units are an alternative.',
+    wrong:'Irradiation, leukoreduction, and CMV-negative selection do not remove the offending plasma proteins.',
+    pearl:'Recurrent severe allergic/anaphylactic reactions or IgA deficiency → washed products.' },
+
+  { id:'c1', pillar:'coag', diff:'easy',
+    stem:'The PT/INR is used primarily to monitor which therapy?',
+    opts:['Unfractionated heparin','Warfarin','Low-molecular-weight heparin','Aspirin'],
+    answer:1,
+    explain:'PT/INR reflects the extrinsic/common pathway and is the standard monitor for warfarin.',
+    wrong:'Unfractionated heparin is followed by aPTT; LMWH by anti-Xa; aspirin is not monitored by a routine coagulation time.',
+    pearl:'PT = extrinsic/common (warfarin, vitamin K, liver). aPTT = intrinsic/common (heparin, hemophilia).' },
+  { id:'c2', pillar:'coag', diff:'easy',
+    stem:'A young man has bled into joints since childhood. aPTT is prolonged, PT normal, and the aPTT corrects on a mixing study. Most likely?',
+    opts:['Disseminated intravascular coagulation','Hemophilia (factor VIII or IX deficiency)','Warfarin effect','Vitamin K deficiency'],
+    answer:1,
+    explain:'Isolated long aPTT, normal PT, lifelong deep bleeds, and correction on mixing point to a factor deficiency — hemophilia A (VIII) or B (IX).',
+    wrong:'DIC prolongs both tests and lowers platelets/fibrinogen; warfarin and vitamin K deficiency prolong the PT.',
+    pearl:'Corrects on mixing = deficiency. Hemophilia is X-linked with deep (joint/muscle) bleeding.' },
+  { id:'c3', pillar:'coag', diff:'moderate',
+    stem:'A prolonged aPTT does NOT correct when mixed 1:1 with normal plasma. Best interpretation?',
+    opts:['A factor deficiency','An inhibitor (e.g., factor antibody or lupus anticoagulant)','Simple vitamin K deficiency','The sample was contaminated and is uninterpretable'],
+    answer:1,
+    explain:'Failure to correct means something in the patient’s plasma neutralizes the factor even when normal plasma is added — an inhibitor.',
+    wrong:'A deficiency would correct once normal plasma supplies the factor; vitamin K deficiency prolongs PT and corrects on mixing.',
+    pearl:'Long aPTT? Mix it. Corrects = deficiency; doesn’t correct = inhibitor.' },
+  { id:'c4', pillar:'coag', diff:'moderate',
+    stem:'A septic ICU patient has low platelets, low fibrinogen, prolonged PT and aPTT, very high D-dimer, and schistocytes. Diagnosis?',
+    opts:['Disseminated intravascular coagulation','Thrombotic thrombocytopenic purpura','Isolated vitamin K deficiency','Hemophilia A'],
+    answer:0,
+    explain:'Simultaneous consumption of platelets, fibrinogen, and factors with a high D-dimer is the consumptive picture of DIC, usually triggered by sepsis.',
+    wrong:'TTP leaves PT/aPTT and fibrinogen NORMAL; vitamin K deficiency and hemophilia do not consume fibrinogen or platelets.',
+    pearl:'DIC consumes everything; the normal coagulation panel is what separates TTP from DIC.' },
+  { id:'c5', pillar:'coag', diff:'moderate',
+    stem:'In a cirrhotic patient with a prolonged PT, which factor is typically preserved and helps distinguish liver disease from DIC?',
+    opts:['Factor II','Factor VII','Factor VIII','Factor X'],
+    answer:2,
+    explain:'Factor VIII is made largely by endothelium, so it is normal or high in liver disease but low in DIC (where it is consumed).',
+    wrong:'Factors II, VII, and X are synthesized by the liver and fall in hepatic failure.',
+    pearl:'Normal/high factor VIII + prolonged PT → liver disease rather than DIC.' },
+  { id:'c6', pillar:'coag', diff:'moderate',
+    stem:'Which set of clotting factors depends on vitamin K?',
+    opts:['II, VII, IX, X','VIII and von Willebrand factor','V and fibrinogen','XI and XII'],
+    answer:0,
+    explain:'Factors II, VII, IX, and X (plus proteins C and S) require vitamin K for γ-carboxylation; warfarin blocks this.',
+    wrong:'Factor VIII/vWF, factor V/fibrinogen, and the contact factors are not vitamin K–dependent.',
+    pearl:'Because factor VII has the shortest half-life, the PT/INR rises first in vitamin K deficiency or early warfarin.' },
+  { id:'c7', pillar:'coag', diff:'integrative',
+    stem:'A patient has easy bruising and mucosal bleeding, a NORMAL platelet count, and a normal/only mildly prolonged aPTT. Most likely category?',
+    opts:['Immune thrombocytopenia (ITP)','A platelet function defect / von Willebrand disease','Disseminated intravascular coagulation','Factor X deficiency'],
+    answer:1,
+    explain:'Mucocutaneous bleeding with a normal count points to a qualitative problem — platelet dysfunction (aspirin, uremia) or von Willebrand disease.',
+    wrong:'ITP and DIC lower the platelet count; an isolated factor X deficiency prolongs both PT and aPTT and causes deeper bleeding.',
+    pearl:'Platelet COUNT ≠ platelet FUNCTION — a normal CBC never excludes a functional defect.' },
+  { id:'c8', pillar:'coag', diff:'integrative',
+    stem:'A well patient with no bleeding history has a surprising isolated prolonged aPTT drawn from a central line. Best next step?',
+    opts:['Start an urgent factor-deficiency work-up','Transfuse FFP empirically','Redraw peripherally to exclude heparin contamination / a preanalytic artifact','Give vitamin K'],
+    answer:2,
+    explain:'A line draw can be contaminated with heparin and an underfilled tube falsely prolongs the aPTT. Confirm the result before any work-up or treatment.',
+    wrong:'Working up, transfusing, or giving vitamin K before excluding a bad sample wastes resources and may harm the patient.',
+    pearl:'Rule out the bad tube before chasing a coagulopathy — the commonest “coagulopathy” on the wards is preanalytic.' },
+
+  { id:'a1', pillar:'aph', diff:'easy',
+    stem:'What is the default replacement fluid for most therapeutic plasma exchanges?',
+    opts:['Albumin','Plasma (FFP) every time','Normal saline alone','Packed red blood cells'],
+    answer:0,
+    explain:'Albumin (5%) is the standard replacement — no infectious or allergic risk of plasma — except where factors are needed.',
+    wrong:'Plasma is reserved for TTP or active coagulopathy; saline alone cannot maintain oncotic pressure; red cells are not a volume replacement here.',
+    pearl:'Albumin is the default; TTP is the classic reason to replace with plasma instead.' },
+  { id:'a2', pillar:'aph', diff:'moderate',
+    stem:'A confused young woman has platelets 14k, schistocytes, very high LDH, and NORMAL PT/aPTT. The most urgent therapy is:',
+    opts:['Platelet transfusion','Therapeutic plasma exchange with plasma replacement','Heparin infusion','Observation pending ADAMTS13 results'],
+    answer:1,
+    explain:'This is TTP. Urgent plasma exchange removes the anti-ADAMTS13 antibody and ultra-large vWF multimers and replaces the enzyme — it is lifesaving (ASFA Category I). Do not wait for ADAMTS13 to result.',
+    wrong:'Platelets can worsen microthrombosis; heparin treats clotting of a different mechanism; waiting risks death.',
+    pearl:'MAHA + thrombocytopenia with a normal coagulation panel → start plasma exchange now; hold platelets.' },
+  { id:'a3', pillar:'aph', diff:'moderate',
+    stem:'A patient with sickle cell disease has an acute ischemic stroke with a high HbS. Best transfusion strategy?',
+    opts:['Simple transfusion to hemoglobin 12 g/dL','Red cell exchange','Plasma exchange','Platelet transfusion'],
+    answer:1,
+    explain:'Red cell exchange rapidly lowers the HbS percentage while avoiding the hyperviscosity and iron loading of aggressive simple transfusion.',
+    wrong:'Pushing the hemoglobin up with simple transfusion raises viscosity dangerously; plasma exchange and platelets do not address sickled red cells.',
+    pearl:'Sickle stroke or acute chest → red cell EXCHANGE, not a big simple transfusion.' },
+  { id:'a4', pillar:'aph', diff:'moderate',
+    stem:'Midway through apheresis a patient reports perioral and fingertip tingling. Most likely cause?',
+    opts:['Air embolism','Citrate-induced hypocalcemia','TRALI','Hemolysis'],
+    answer:1,
+    explain:'Citrate anticoagulant chelates calcium, producing hypocalcemia — the most common apheresis complication. Slow the rate and give calcium.',
+    wrong:'Air embolism and hemolysis are rare and present differently; TRALI is a transfusion lung injury, not a tingling syndrome.',
+    pearl:'Perioral/fingertip tingling during apheresis = citrate hypocalcemia until proven otherwise.' },
+  { id:'a5', pillar:'aph', diff:'integrative',
+    stem:'A patient with AML has a WBC of 350k with dyspnea and confusion (leukostasis). Which procedure addresses the acute problem?',
+    opts:['Plasma exchange','Red cell exchange','Leukapheresis','Plateletpheresis'],
+    answer:2,
+    explain:'Leukapheresis (cytapheresis) rapidly reduces the circulating blast burden to relieve symptomatic hyperleukocytosis while definitive chemotherapy begins.',
+    wrong:'Plasma and red cell exchange target plasma factors and red cells; plateletpheresis removes platelets, not white cells.',
+    pearl:'Too many of one cell, causing symptoms now → cytapheresis (leukapheresis here).' },
+  { id:'a6', pillar:'aph', diff:'moderate',
+    stem:'Why are platelet transfusions generally avoided in TTP?',
+    opts:['They are simply ineffective','They can fuel ongoing microthrombosis','They cause ABO incompatibility','They block plasma exchange'],
+    answer:1,
+    explain:'Adding platelets to a process driven by platelet microthrombi can worsen organ ischemia; reserve them for life-threatening bleeding.',
+    wrong:'The concern is harm from added thrombosis, not ineffectiveness, ABO issues, or interference with exchange.',
+    pearl:'In TTP, platelets are “fuel to the fire” — treat with plasma exchange instead.' }
+];
+
+const CHECKPOINTS = [
+  { id:'bc1', pillar:'blood', diff:'easy',
+    stem:'Which unit is the universal RED-CELL donor in an emergency?',
+    opts:['AB positive','O negative','A negative','O positive'],
+    answer:1,
+    explain:'O-negative red cells lack A, B, and D antigens, so they are safe to give before the type is known.',
+    wrong:'AB is the universal recipient; A-negative is type-specific; O-positive risks anti-D in D-negative women.',
+    pearl:'O-negative for emergencies and child-bearing-age women; O-positive is acceptable for many males to conserve supply.' },
+  { id:'bc2', pillar:'blood', diff:'easy',
+    stem:'What is the first step in any suspected transfusion reaction?',
+    opts:['Call the attending','Stop the transfusion','Give acetaminophen','Draw blood cultures'],
+    answer:1,
+    explain:'Stop the transfusion first, keep the line open with saline, then evaluate and notify the blood bank.',
+    wrong:'The other steps may follow, but none should precede stopping the infusion.',
+    pearl:'Stopping the transfusion is never the wrong first move.' },
+  { id:'cc1', pillar:'coag', diff:'easy',
+    stem:'The aPTT primarily reflects which pathway(s)?',
+    opts:['Extrinsic only','Intrinsic + common','Fibrinolysis','Platelet function'],
+    answer:1,
+    explain:'The aPTT measures the intrinsic (XII, XI, IX, VIII) plus common (X, V, II, fibrinogen) pathway.',
+    wrong:'The extrinsic pathway is the PT; aPTT does not measure fibrinolysis or platelet function.',
+    pearl:'PT = extrinsic/common; aPTT = intrinsic/common.' },
+  { id:'cc2', pillar:'coag', diff:'moderate',
+    stem:'A prolonged aPTT corrects after a 1:1 mix with normal plasma. This indicates:',
+    opts:['An inhibitor','A factor deficiency','A lupus anticoagulant','Disseminated intravascular coagulation'],
+    answer:1,
+    explain:'Correction means the missing factor was supplied by normal plasma — a deficiency.',
+    wrong:'Inhibitors and lupus anticoagulant do NOT correct; DIC is a consumptive process affecting multiple tests.',
+    pearl:'Corrects = deficiency; doesn’t correct = inhibitor.' },
+  { id:'ac1', pillar:'aph', diff:'easy',
+    stem:'In TTP, what replacement fluid is used during plasma exchange?',
+    opts:['Albumin','Plasma (FFP)','Normal saline','Packed red cells'],
+    answer:1,
+    explain:'Plasma replacement supplies ADAMTS13 while the exchange removes the antibody and ultra-large multimers.',
+    wrong:'Albumin (the usual default) contains no ADAMTS13; saline and red cells do not treat TTP.',
+    pearl:'TTP is the classic indication to replace with plasma rather than albumin.' },
+  { id:'ac2', pillar:'aph', diff:'easy',
+    stem:'In one phrase, therapeutic apheresis is best described as:',
+    opts:['A whole-blood transfusion','Selectively removing or exchanging one blood component','Dialysis of urea and creatinine','A bone-marrow biopsy'],
+    answer:1,
+    explain:'A machine separates blood, removes or swaps the problematic component, and returns the rest.',
+    wrong:'It is not a transfusion, not renal dialysis, and not a marrow procedure.',
+    pearl:'Remove or exchange one part; return the rest — that one idea covers every modality.' }
+];
+
+/* ============================================================
+   DATA — CASES
+   ============================================================ */
+const CASES = [
+  { slot:'blood', tagClass:'blood', tagLabel:'Blood bank', title:'The trauma bay',
+    blurb:'24-year-old after a motorcycle crash: BP 80/50, HR 130, obvious external hemorrhage. No blood type on file.',
+    steps:[
+      { label:'What do you release now?', prompt:'She is exsanguinating and there is no time to type and screen. What blood goes up?',
+        reveal:'<strong>Emergency-release O red cells</strong> (O-negative because she could be pregnant) and <strong>AB plasma</strong>, uncrossmatched. Activate the massive transfusion protocol — don’t wait for the lab.' },
+      { label:'How do you keep resuscitating?', prompt:'Units are running. What ratio and what do you send to the lab?',
+        reveal:'Resuscitate in a balanced <strong>1 : 1 : 1</strong> ratio of red cells : plasma : platelets. Send a type &amp; screen so the lab can switch to type-specific blood as soon as it’s available.' },
+      { label:'A new problem at unit 8', prompt:'After many units she develops perioral tingling and a prolonged QT. Why — and what do you do?',
+        reveal:'Citrate in stored blood chelates calcium → <strong>hypocalcemia</strong>. Give IV calcium, keep her warm, and watch potassium and pH (the lethal triad: cold, acidotic, coagulopathic).' }
+    ]},
+  { slot:'coag', tagClass:'coag', tagLabel:'Coagulation', title:'The pre-op panel that won’t make sense',
+    blurb:'30-year-old man for elective surgery. Routine aPTT is 62s, PT normal. He feels well and has no bleeding history.',
+    labs:[ {k:'aPTT',v:'62 s',s:'hi'}, {k:'PT',v:'12 s'}, {k:'Platelets',v:'240k'} ],
+    steps:[
+      { label:'First move before cancelling', prompt:'Do you cancel the case for an abnormal aPTT?',
+        reveal:'First make sure it’s real. Exclude a <strong>heparin-contaminated line draw</strong> or an underfilled tube — redraw peripherally. A well patient with no bleeding history and an isolated long aPTT is often preanalytic or a lupus anticoagulant.' },
+      { label:'The redraw confirms it', prompt:'Peripheral aPTT is still 60s. What single test sorts this out?',
+        reveal:'A <strong>mixing study</strong>. Corrects → factor deficiency. Doesn’t correct → inhibitor (a factor antibody or a lupus anticoagulant).' },
+      { label:'It does not correct', prompt:'The mix fails to correct and he has never bled. Interpretation — and does surgery proceed?',
+        reveal:'Think <strong>lupus anticoagulant</strong>: a long aPTT with a <em>thrombotic</em>, not bleeding, tendency. Confirm with dRVVT and antiphospholipid antibodies. Unlike a true factor deficiency, it generally does not mean he will bleed at surgery.' }
+    ]},
+  { slot:'aph', tagClass:'aph', tagLabel:'Apheresis', title:'The 2 a.m. consult',
+    blurb:'Medicine pages: 28-year-old woman, new headache and confusion. Platelets 14k, hemoglobin 7.5 with schistocytes, LDH very high, creatinine mildly elevated. PT and aPTT normal.',
+    labs:[ {k:'Plt',v:'14k',s:'lo'}, {k:'Schistocytes',v:'present'}, {k:'LDH',v:'↑↑',s:'hi'}, {k:'PT/aPTT',v:'normal'} ],
+    steps:[
+      { label:'The can’t-miss diagnosis', prompt:'What is the diagnosis you cannot afford to miss?',
+        reveal:'<strong>TTP</strong> — microangiopathic hemolytic anemia + thrombocytopenia with a <em>normal</em> coagulation panel (which separates it from DIC). Don’t wait for ADAMTS13 to return.' },
+      { label:'The team wants platelets', prompt:'They ask you to transfuse platelets for the count of 14k. Your answer?',
+        reveal:'Hold platelets unless there is life-threatening bleeding — they can worsen the microthrombosis. The treatment is plasma exchange, not platelets.' },
+      { label:'Set it up', prompt:'What do you arrange, and with which replacement fluid?',
+        reveal:'Urgent <strong>therapeutic plasma exchange with PLASMA replacement</strong> (ASFA Category I), daily until platelets recover, plus steroids. Arrange large-bore access and monitor calcium between runs.' }
+    ]},
+  { slot:'lab', tagClass:'mixed', tagLabel:'Integrated', title:'Falling hemoglobin, three days later',
+    blurb:'A 60-year-old woman transfused 2 units three days ago for a GI bleed now has a quietly dropping hemoglobin, mild jaundice, and dark urine. She otherwise feels okay.',
+    steps:[
+      { label:'Acute or delayed?', prompt:'Is this an acute reaction or something slower?',
+        reveal:'A <strong>delayed hemolytic transfusion reaction</strong> — an anamnestic antibody response days later, often to a minor antigen (e.g., Kidd). Hemoglobin falls, bilirubin and LDH rise, and the direct antiglobulin test (DAT) turns positive.' },
+      { label:'What changes going forward', prompt:'How does this affect her future transfusions?',
+        reveal:'The blood bank identifies the antibody and provides <strong>antigen-negative units</strong> from now on. This is exactly why the antibody screen and a careful transfusion history matter.' }
+    ]},
+  { slot:'lab', tagClass:'mixed', tagLabel:'Integrated', title:'Cirrhosis meets the proceduralist',
+    blurb:'A patient with cirrhosis has an INR of 1.8. Interventional radiology wants to place a line and asks you to “fix the coags” with FFP first. The patient is not bleeding.',
+    labs:[ {k:'INR',v:'1.8',s:'hi'}, {k:'Platelets',v:'95k'}, {k:'Bleeding',v:'none'} ],
+    steps:[
+      { label:'Does the number predict bleeding?', prompt:'Does an INR of 1.8 in cirrhosis reliably predict procedural bleeding?',
+        reveal:'No. Liver disease lowers <em>both</em> pro- and anti-coagulant factors — hemostasis is “rebalanced.” The INR was designed for warfarin, not to gauge bleeding risk in cirrhosis.' },
+      { label:'A better move than prophylactic FFP', prompt:'What’s the wiser approach than reflexive FFP?',
+        reveal:'Avoid transfusing for a number alone — FFP rarely normalizes the INR and adds volume (risking TACO and higher portal pressure). Treat bleeding if it occurs, consider fibrinogen if it’s low, and follow procedure-specific guidance.' }
+    ]}
+];
+
+/* ============================================================
+   DATA — GLOSSARY
+   ============================================================ */
+const GLOSSARY = [
+  { term:'ABO system', def:'The major red-cell antigen groups (A, B, AB, O). You naturally make antibodies against the antigens you lack.', must:true },
+  { term:'Rh / D antigen', def:'The clinically important Rh antigen. D-negative patients can form anti-D after exposure, risking hemolytic disease of the newborn.', must:true },
+  { term:'Type & screen', def:'Determines ABO/Rh and screens the patient’s plasma for unexpected red-cell antibodies. The default pre-transfusion test.', must:true },
+  { term:'Crossmatch', def:'Tests/reserves specific donor units against the patient’s plasma; ordered when transfusion is likely.', must:true },
+  { term:'Emergency release', abbr:'O-neg', def:'Uncrossmatched O red cells (and AB plasma) released immediately when there is no time to type.', must:true },
+  { term:'Packed red blood cells', abbr:'pRBC', def:'Concentrated red cells for oxygen-carrying capacity; one unit raises hemoglobin ~1 g/dL.', must:true },
+  { term:'Platelets', def:'Component for low or dysfunctional platelets; stored warm (highest sepsis risk); one dose raises count ~30–50k.', must:true },
+  { term:'Fresh frozen plasma', abbr:'FFP', def:'Contains all coagulation factors; for multi-factor deficiency, DIC, liver disease, massive transfusion.', must:true },
+  { term:'Cryoprecipitate', def:'Concentrated fibrinogen (plus FVIII, vWF, FXIII); given for hypofibrinogenemia.', must:true },
+  { term:'Leukoreduction', def:'Removal of white cells; reduces febrile reactions, CMV transmission, and HLA alloimmunization.' },
+  { term:'Irradiation', def:'Disables donor lymphocytes to prevent transfusion-associated GVHD in immunocompromised patients, neonates, and directed donations.' },
+  { term:'CMV-safe', def:'CMV-negative or leukoreduced units for CMV-negative at-risk patients (pregnancy, transplant, neonates).' },
+  { term:'Washed product', def:'Plasma proteins removed by saline washing; for IgA deficiency or severe recurrent allergic reactions.' },
+  { term:'Massive transfusion protocol', abbr:'MTP', def:'Balanced 1:1:1 resuscitation for major hemorrhage; watch calcium, potassium, and temperature.' },
+  { term:'Acute hemolytic reaction', abbr:'AHTR', def:'ABO-incompatible hemolysis, usually a clerical error: fever, flank pain, dark urine, hypotension. Stop the transfusion.', must:true },
+  { term:'Febrile non-hemolytic reaction', abbr:'FNHTR', def:'The most common reaction: fever/chills from cytokines and donor white cells; reduced by leukoreduction.' },
+  { term:'TACO', def:'Transfusion-associated circulatory overload — volume overload with hypertension and pulmonary edema; transfuse slowly and diurese.', must:true },
+  { term:'TRALI', def:'Transfusion-related acute lung injury within 6 h: hypoxemia, bilateral infiltrates, normal filling pressures. Leading cause of transfusion death.', must:true },
+  { term:'TA-GVHD', def:'Transfusion-associated graft-versus-host disease; donor lymphocytes attack the host. Prevented by irradiation.' },
+  { term:'Direct antiglobulin test', abbr:'DAT', def:'The “direct Coombs” test; detects antibody bound to the patient’s red cells — positive in immune hemolysis.' },
+  { term:'PT / INR', def:'Prothrombin time / international normalized ratio — the extrinsic + common pathway; monitors warfarin.', must:true },
+  { term:'aPTT', def:'Activated partial thromboplastin time — the intrinsic + common pathway; affected by heparin, hemophilia, vWD, lupus anticoagulant.', must:true },
+  { term:'Fibrinogen', def:'The final clot substrate; low in DIC, severe liver disease, and obstetric hemorrhage.' },
+  { term:'D-dimer', def:'A fibrin breakdown product — sensitive but not specific; most useful when normal to help exclude clot.' },
+  { term:'Mixing study', def:'Patient plasma mixed 1:1 with normal plasma. Corrects → factor deficiency; fails to correct → inhibitor.', must:true },
+  { term:'Factor assay', def:'Quantifies a specific clotting factor’s activity once the screening tests have localized the problem.' },
+  { term:'Lupus anticoagulant', def:'An antiphospholipid antibody that prolongs the aPTT in vitro but promotes clotting in vivo — the classic paradox.' },
+  { term:'Disseminated intravascular coagulation', abbr:'DIC', def:'Systemic consumption of platelets and factors: low platelets/fibrinogen, prolonged PT/aPTT, high D-dimer, schistocytes.', must:true },
+  { term:'Thrombocytopenia', def:'Low platelets from decreased production, increased destruction (ITP, TTP, HIT, DIC), or splenic sequestration.' },
+  { term:'von Willebrand disease', abbr:'vWD', def:'The most common inherited bleeding disorder; mucocutaneous bleeding; may mildly prolong the aPTT.' },
+  { term:'Hemophilia', def:'X-linked deficiency of factor VIII (A) or IX (B): isolated long aPTT, deep joint/muscle bleeds, corrects on mixing.' },
+  { term:'Therapeutic plasma exchange', abbr:'TPE', def:'Removes plasma (and a pathologic antibody or paraprotein), replacing it with albumin or plasma.', must:true },
+  { term:'Red cell exchange', abbr:'RCE', def:'Swaps the patient’s red cells for donor cells; lowers HbS% in sickle stroke/acute chest without hyperviscosity.', must:true },
+  { term:'Leukapheresis', def:'Cytapheresis that removes white cells to relieve symptomatic hyperleukocytosis (leukostasis).' },
+  { term:'ADAMTS13', def:'The enzyme that cleaves von Willebrand multimers; its deficiency (usually autoantibody) causes TTP.', must:true },
+  { term:'Thrombotic thrombocytopenic purpura', abbr:'TTP', def:'MAHA + thrombocytopenia with a normal coagulation panel; treat with urgent plasma exchange, not platelets.', must:true },
+  { term:'Citrate toxicity', def:'The anticoagulant citrate chelates calcium during apheresis → hypocalcemia (perioral/fingertip tingling).' },
+  { term:'ASFA category', def:'A I–IV ranking of apheresis indications: I first-line, II second-line, III individualized, IV ineffective/harmful.' },
+  { term:'HPC collection', def:'Apheresis collection of CD34+ hematopoietic progenitor (stem) cells after mobilization, for transplant.' }
+];
+
+/* ============================================================
+   QUIZ ENGINE
+   ============================================================ */
+const STATE = { answered:new Set(), correct:0 };
+const RING_C = 97.4;
+let currentFilter = 'all';
+
+function buildQuestion(q){
+  const card = document.createElement('article');
+  card.className = 'q'; card.dataset.pillar = q.pillar; card.dataset.qid = q.id;
+  const meta = document.createElement('div'); meta.className = 'q-meta';
+  meta.innerHTML = '<span class="q-diff '+q.diff+'">'+q.diff+'</span><span class="q-pillar">'+(PILLAR_NAME[q.pillar]||'')+'</span>';
+  const stem = document.createElement('p'); stem.className = 'q-stem'; stem.innerHTML = q.stem;
+  const opts = document.createElement('div'); opts.className = 'q-opts';
+  const explain = document.createElement('div'); explain.className = 'q-explain';
+  q.opts.forEach((text,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt'; b.type = 'button';
+    b.innerHTML = '<span class="opt-key">'+KEYS[i]+'</span><span>'+text+'</span>';
+    b.addEventListener('click', ()=> answerQuestion(q, card, opts, explain, i));
+    opts.appendChild(b);
+  });
+  card.append(meta, stem, opts, explain);
+  return card;
+}
+
+function answerQuestion(q, card, opts, explain, choice){
+  if(card.dataset.done) return;
+  card.dataset.done = '1';
+  const btns = [...opts.children];
+  btns.forEach((b,i)=>{
+    b.disabled = true;
+    if(i === q.answer){ b.classList.add('is-correct'); b.insertAdjacentHTML('beforeend','<span class="opt-mark">✓</span>'); }
+    else if(i === choice){ b.classList.add('is-wrong'); b.insertAdjacentHTML('beforeend','<span class="opt-mark">✗</span>'); }
+  });
+  const ok = choice === q.answer;
+  STATE.answered.add(q.id); if(ok) STATE.correct++;
+  explain.innerHTML =
+    '<div class="verdict '+(ok?'ok':'no')+'">'+(ok?'✓ Correct':'✗ Not quite')+'</div>'+
+    '<p><strong>'+KEYS[q.answer]+' is correct.</strong> '+q.explain+'</p>'+
+    '<p class="why-wrong">'+q.wrong+'</p>'+
+    '<div class="callout callout--pearl"><span class="tag tag--pearl">Teaching pearl</span><p>'+q.pearl+'</p></div>';
+  explain.classList.add('show');
+  updateProgress();
+}
+
+function renderQuiz(){
+  STATE.answered.clear(); STATE.correct = 0;
+  const bank = $('#quizBank'); bank.innerHTML = '';
+  QUESTIONS.forEach(q => bank.appendChild(buildQuestion(q)));
+  $$('[data-checkpoint]').forEach(box=>{
+    box.innerHTML = '';
+    CHECKPOINTS.filter(q => q.pillar === box.dataset.checkpoint).forEach(q => box.appendChild(buildQuestion(q)));
+  });
+  applyFilter(currentFilter);
+  updateProgress();
+}
+
+function applyFilter(f){
+  currentFilter = f;
+  $$('#quizBank .q').forEach(card=>{
+    card.style.display = (f === 'all' || card.dataset.pillar === f) ? '' : 'none';
+  });
+}
+
+function updateProgress(){
+  const total = $$('.q').length;
+  const ans = STATE.answered.size;
+  const frac = total ? ans/total : 0;
+  const ring = $('#ring');
+  if(ring) ring.style.strokeDashoffset = (RING_C * (1 - frac)).toFixed(1);
+  const pct = $('#progPct'); if(pct) pct.textContent = Math.round(frac*100)+'%';
+  const lbl = $('#progLabel'); if(lbl) lbl.textContent = ans+' / '+total+' answered';
+  const sc = $('#qScore'); if(sc) sc.textContent = STATE.correct;
+  const qa = $('#qAnswered'); if(qa) qa.textContent = ans;
+}
+
+/* ============================================================
+   CASES
+   ============================================================ */
+function buildCase(c){
+  const wrap = document.createElement('article'); wrap.className = 'case';
+  const labs = c.labs ? '<div class="labs">'+c.labs.map(l=>'<span class="lab '+(l.s||'')+'"><span class="k">'+l.k+'</span><span class="v">'+l.v+'</span></span>').join('')+'</div>' : '';
+  wrap.innerHTML = '<div class="case-head"><span class="case-tag '+c.tagClass+'">'+c.tagLabel+'</span><div><h4>'+c.title+'</h4><p>'+c.blurb+'</p></div></div><div class="case-body">'+labs+'</div>';
+  const body = wrap.querySelector('.case-body');
+  c.steps.forEach((s,i)=>{
+    const step = document.createElement('div'); step.className = 'case-step';
+    step.innerHTML =
+      '<div class="label">Step '+(i+1)+' · '+s.label+'</div>'+
+      '<p class="prompt">'+s.prompt+'</p>'+
+      '<div class="case-controls"><button class="btn btn--ghost btn--sm" type="button">Reveal reasoning</button></div>'+
+      '<div class="case-reveal">'+s.reveal+'</div>';
+    const btn = step.querySelector('button'); const rev = step.querySelector('.case-reveal');
+    btn.addEventListener('click', ()=>{ const open = rev.classList.toggle('show'); btn.textContent = open ? 'Hide reasoning' : 'Reveal reasoning'; });
+    body.appendChild(step);
+  });
+  return wrap;
+}
+function renderCases(){
+  $$('[data-case-slot]').forEach(slot=>{
+    const where = slot.dataset.caseSlot;
+    CASES.filter(c => c.slot === where).forEach(c => slot.appendChild(buildCase(c)));
+  });
+}
+
+/* ============================================================
+   GLOSSARY
+   ============================================================ */
+function renderGloss(filter){
+  const list = $('#glossList'); if(!list) return;
+  const f = (filter||'').trim().toLowerCase();
+  const items = GLOSSARY.filter(g => !f || (g.term+' '+(g.abbr||'')+' '+g.def).toLowerCase().includes(f))
+                        .sort((a,b)=> a.term.localeCompare(b.term));
+  if(!items.length){ list.innerHTML = '<div class="gloss-empty">No terms match “'+filter+'”.</div>'; return; }
+  list.innerHTML = items.map(g =>
+    '<div class="gloss-item'+(g.must?' mustknow':'')+'"><div class="term">'+g.term+(g.abbr?'<span class="abbr">'+g.abbr+'</span>':'')+'</div><div class="def">'+g.def+'</div></div>'
+  ).join('');
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+const root = document.documentElement;
+function setTheme(t){ root.dataset.theme = t; try{ localStorage.setItem('tm-theme', t); }catch(e){} }
+$('#themeBtn').addEventListener('click', ()=> setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+
+/* ============================================================
+   NAV · SCROLL-SPY · PROGRESS BAR
+   ============================================================ */
+const main = $('#main');
+const sections = $$('.section');
+const navItems = $$('.nav-item');
+const bar = $('#scrollbar');
+const crumb = $('#crumbTitle');
+const toTop = $('#toTop');
+let ticking = false;
+
+function onScroll(){
+  const st = main.scrollTop;
+  const h = main.scrollHeight - main.clientHeight;
+  if(bar) bar.style.width = (h > 0 ? (st/h*100) : 0) + '%';
+  if(toTop) toTop.hidden = st < 400;
+  let active = sections[0];
+  for(const s of sections){ if(s.offsetTop - st <= 130) active = s; }
+  if(active){
+    navItems.forEach(n => n.classList.toggle('is-active', n.dataset.nav === active.id));
+    if(crumb) crumb.textContent = active.dataset.section;
+  }
+}
+main.addEventListener('scroll', ()=>{ if(!ticking){ requestAnimationFrame(()=>{ onScroll(); ticking = false; }); ticking = true; } });
+if(toTop) toTop.addEventListener('click', ()=> main.scrollTo({ top:0, behavior:'smooth' }));
+
+const body = document.body;
+const menuBtn = $('#menuBtn');
+menuBtn.addEventListener('click', ()=>{
+  const open = body.classList.toggle('nav-open');
+  menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+/* explicit smooth-scroll for in-page links (robust inside the custom scroll container) */
+const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+$$('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const id = a.getAttribute('href').slice(1);
+    const target = id && document.getElementById(id);
+    if(!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block:'start' });
+    try{ history.replaceState(null, '', '#'+id); }catch(err){}
+    body.classList.remove('nav-open'); menuBtn.setAttribute('aria-expanded','false');
+  });
+});
+document.addEventListener('click', e=>{
+  if(body.classList.contains('nav-open') && !e.target.closest('.sidebar') && !e.target.closest('#menuBtn')){
+    body.classList.remove('nav-open'); menuBtn.setAttribute('aria-expanded','false');
+  }
+});
+
+/* ============================================================
+   TABS
+   ============================================================ */
+$$('.tabs').forEach(tabs=>{
+  const scope = tabs.parentElement;
+  tabs.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.querySelectorAll('.tab').forEach(t=> t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      const id = tab.dataset.tab;
+      scope.querySelectorAll('.tabpane').forEach(p=> p.classList.toggle('is-active', p.dataset.pane === id));
+    });
+  });
+});
+
+/* ============================================================
+   REVEAL ON SCROLL
+   ============================================================ */
+function initReveal(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    $$('.reveal').forEach(r=> r.classList.add('in')); return;
+  }
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, { root:main, rootMargin:'0px 0px -6% 0px', threshold:0.05 });
+  $$('.reveal').forEach(r=> obs.observe(r));
+}
+
+/* ============================================================
+   STATS + INIT
+   ============================================================ */
+function fillStats(){
+  const setT=(id,v)=>{ const el=$('#'+id); if(el) el.textContent=v; };
+  setT('statCases', CASES.length);
+  setT('statQ', QUESTIONS.length + CHECKPOINTS.length);
+  setT('statGloss', GLOSSARY.length);
+}
+
+renderQuiz();
+renderCases();
+renderGloss('');
+fillStats();
+const gs = $('#glossSearch'); if(gs) gs.addEventListener('input', e=> renderGloss(e.target.value));
+$('#quizReset').addEventListener('click', renderQuiz);
+$$('#quizFilters .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    $$('#quizFilters .chip').forEach(c=> c.classList.remove('is-active'));
+    chip.classList.add('is-active');
+    applyFilter(chip.dataset.filter);
+  });
+});
+
+initReveal();
+onScroll();
+})();
+</script>
+<script src="assets/reference/refdata.js"></script>
+<script src="assets/reference/engine.js"></script>
+<script src="assets/reference/reference.js"></script>
+<script src="assets/reference/reference2.js"></script>
+</body>
+</html>
