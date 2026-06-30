@@ -27,7 +27,8 @@
     var bp = REF.bloodprep || {};
     var surgeries = bp.surgeries || [], antigens = bp.antigens || [],
         hgbBands = bp.hgb_bands || [], races = bp.races || [];
-    var state = { surgery_id: "", hgb: "", race: "other", recipient_abo: "", antibodies: {}, surgQ: "", surgDiv: "" };
+    // Donor-population frequencies are standardized on the White donor pool.
+    var state = { surgery_id: "", hgb: "", race: "white", recipient_abo: "", antibodies: {}, surgQ: "", surgDiv: "" };
 
     function normDiv(s) { s = (s || "").trim(); return /^cardio/i.test(s) ? "Cardiac" : s; }
     var divisions = {};
@@ -100,7 +101,7 @@
     /* --- hemoglobin + race --- */
     var ctxCard = el("div", { class: "surface ref-card" }, el("h4", {}, "Patient context"));
     ctxCard.appendChild(field("Most recent hemoglobin", seg(hgbBands.map(function (h) { return { value: h.value, label: h.label }; }), state.hgb, function (v) { state.hgb = v; run(); })));
-    ctxCard.appendChild(field("Race / ethnicity (for antigen-negative frequency)", seg(races.map(function (r) { return { value: r.value, label: r.label }; }), state.race, function (v) { state.race = v; run(); })));
+    ctxCard.appendChild(field("Donor population", el("div", { style: "font-weight:600; padding:4px 0" }, "White / Caucasian"), "Antigen-negative and ABO donor frequencies are based on the White donor population."));
     var aboGroups = (REF.abo && REF.abo.groups) || [{ value: "", label: "Unknown" }];
     ctxCard.appendChild(field("Recipient ABO group (for ABO-compatible donor pool)", seg(aboGroups.map(function (g) { return { value: g.value, label: g.label }; }), state.recipient_abo, function (v) { state.recipient_abo = v; run(); }), "Antigen-negative frequency is ABO-independent; this shrinks the random-donor pool only."));
     controls.appendChild(ctxCard);
