@@ -1,7 +1,7 @@
 # Transfusion Medicine — One-Day Crash Course
 ## Phase 1 Planning Package
 
-> Built for **Eric** — a clinical pathology resident, Henry Ford Pathology Residency.
+> A standard resident reference for the Henry Ford Pathology Residency — transfusion medicine / blood bank rotation.
 > Author/educator: academic pathologist & transfusion medicine educator.
 
 This document is the planning and content blueprint that the dashboard (`index.html`) is built from. It is intentionally written so the dashboard could be rebuilt or extended without guessing.

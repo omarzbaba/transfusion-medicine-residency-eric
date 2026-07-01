@@ -1,12 +1,12 @@
 /* ============================================================================
    reference2.js — Blood-for-the-OR (MSBOS), Antibody panel ID, Therapeutic
-   apheresis. Uses helpers from window.ERICREFUI and logic from window.ERICENGINE.
+   apheresis. Uses helpers from window.TMREFUI and logic from window.TMENGINE.
    Reference only — composers build copy-ready note skeletons; nothing is stored.
    ============================================================================ */
 (function () {
   "use strict";
-  var RUI = window.ERICREFUI, REF = window.ERICREF || {}, ENG = window.ERICENGINE;
-  if (!RUI) { console.error("ERICREFUI missing"); return; }
+  var RUI = window.TMREFUI, REF = window.TMREF || {}, ENG = window.TMENGINE;
+  if (!RUI) { console.error("TMREFUI missing"); return; }
   var el = RUI.el, clear = RUI.clear, debounce = RUI.debounce, copyText = RUI.copyText,
       seg = RUI.seg, selectEl = RUI.selectEl, field = RUI.field;
 

@@ -1,7 +1,7 @@
 /* ============================================================================
    engine.js — clinical decision logic, ported verbatim from the TM·Coag Logger
    Python source (panels/interpreter.py, bloodprep/compute.py, bloodprep/rh.py).
-   Pure functions; no DOM, no network. window.ERICENGINE = { ... }.
+   Pure functions; no DOM, no network. window.TMENGINE = { ... }.
    ============================================================================ */
 (function () {
   "use strict";
@@ -181,7 +181,7 @@
   var RH_ANTIGENS = { D: 1, C: 1, c: 1, E: 1, e: 1 };
   function isRh(code) { return code in RH_ANTIGENS; }
 
-  function bp() { return (window.ERICREF && window.ERICREF.bloodprep) || {}; }
+  function bp() { return (window.TMREF && window.TMREF.bloodprep) || {}; }
   function antigenIndex() {
     var m = {}; (bp().antigens || []).forEach(function (a) { m[a.code] = a; }); return m;
   }
@@ -223,7 +223,7 @@
   // only — it does not change the antigen-negative % or the crossmatch count.
   function aboCompatFraction(recip, race) {
     if (!recip) return 1.0;
-    var d = (window.ERICREF && window.ERICREF.abo) || null;
+    var d = (window.TMREF && window.TMREF.abo) || null;
     if (!d) return 1.0;
     var compat = (d.compatible || {})[recip];
     if (!compat) return 1.0;
@@ -376,7 +376,7 @@
     return lines.join("\n").replace(/\s+$/, "") + "\n";
   }
 
-  window.ERICENGINE = {
+  window.TMENGINE = {
     interpret: interpret, bloodprepCompute: bloodprepCompute,
     analyteDefault: analyteDefault, findState: findState, groupsOf: groupsOf, fmtPct: fmtPct
   };

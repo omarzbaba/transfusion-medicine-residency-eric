@@ -1,11 +1,11 @@
 /* ============================================================================
    reference.js — the six clinical reference / decision-support tools, rendered
-   client-side from window.ERICREF (data) + window.ERICENGINE (logic).
+   client-side from window.TMREF (data) + window.TMENGINE (logic).
    Reference only: no case logging, no patient data is stored or transmitted.
    ============================================================================ */
 (function () {
   "use strict";
-  var REF = window.ERICREF || {}, ENG = window.ERICENGINE;
+  var REF = window.TMREF || {}, ENG = window.TMENGINE;
 
   /* ---------------- helpers ---------------- */
   function el(tag, attrs) {
@@ -313,13 +313,13 @@
 
   /* boot the four tools defined in this file (the rest are in reference2.js) */
   function boot() {
-    if (!ENG) { console.error("ERICENGINE missing"); return; }
+    if (!ENG) { console.error("TMENGINE missing"); return; }
     var p = document.getElementById("ref-platelet"); if (p && REF.plateletPanel) renderPanel(p, REF.plateletPanel);
     var t = document.getElementById("ref-txnreact"); if (t && REF.tmPanel) renderPanel(t, REF.tmPanel);
     var tc = document.getElementById("ref-txncatalog"); if (tc) renderTxnCatalog(tc);
     var a = document.getElementById("ref-asfa"); if (a) renderAsfa(a);
   }
-  window.ERICREFUI = { el: el, append: append, clear: clear, debounce: debounce, toast: toast,
+  window.TMREFUI = { el: el, append: append, clear: clear, debounce: debounce, toast: toast,
     copyText: copyText, seg: seg, selectEl: selectEl, field: field };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
 })();

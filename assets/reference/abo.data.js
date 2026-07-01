@@ -2,8 +2,8 @@
    hunting antigen-negative units. EDIT these to match your local donor population.
    `compatible` = which donor ABO groups a recipient can receive RBCs from.
    Prevalences are approximate, race-stratified fractions (sum ~1.0 per race). */
-window.ERICREF = window.ERICREF || {};
-window.ERICREF.abo = {
+window.TMREF = window.TMREF || {};
+window.TMREF.abo = {
   groups: [
     { value: "",   label: "Unknown" },
     { value: "O",  label: "O" },
