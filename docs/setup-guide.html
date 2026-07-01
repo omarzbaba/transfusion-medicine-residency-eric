@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Setup & Maintenance Guide</title>
+<style>
+  @page { size: letter; margin: 0.85in 0.8in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+    color: #1c2530; font-size: 10.6pt; line-height: 1.5; margin: 0;
+  }
+  :root { --navy:#0b3d63; --blue:#0b5cad; --ink:#1c2530; --muted:#55606c; --line:#dde3ea; --soft:#f4f7fa; }
+
+  /* cover */
+  .cover { border-top: 6px solid var(--navy); padding-top: 20px; margin-bottom: 26px; }
+  .eyebrow { font-size: 8.5pt; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); font-weight: 700; }
+  h1 { font-size: 23pt; line-height: 1.12; color: var(--navy); margin: 8px 0 6px; letter-spacing: -0.01em; }
+  .sub { font-size: 12pt; color: var(--muted); margin: 0 0 14px; }
+  .cover-meta { font-size: 9.2pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+  .cover-meta strong { color: var(--ink); }
+
+  h2 { font-size: 13.5pt; color: var(--navy); margin: 22px 0 8px; padding-bottom: 5px;
+       border-bottom: 2px solid var(--navy); break-after: avoid; }
+  h3 { font-size: 11pt; color: var(--ink); margin: 15px 0 5px; break-after: avoid; }
+  p { margin: 6px 0; }
+  a { color: var(--blue); text-decoration: none; word-break: break-word; }
+  strong { color: var(--ink); }
+  .lead { font-size: 11pt; color: var(--muted); }
+
+  ol, ul { margin: 6px 0 6px 0; padding-left: 20px; }
+  li { margin: 4px 0; }
+  ol.steps { counter-reset: s; list-style: none; padding-left: 0; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 3px 0 3px 30px; margin: 5px 0; break-inside: avoid; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 20px; height: 20px;
+    background: var(--navy); color: #fff; border-radius: 50%; font-size: 8.5pt; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 12px 15px; margin: 12px 0; background: var(--soft); break-inside: avoid; }
+  .box h4 { margin: 0 0 6px; font-size: 10pt; color: var(--navy); }
+  .box.accent { border-left: 4px solid var(--blue); }
+  .box.warn { border-left: 4px solid #b3541e; background: #fbf3ec; }
+  .box.tip  { border-left: 4px solid #2f7d4f; background: #eef7f0; }
+
+  .pill { display:inline-block; background: var(--navy); color:#fff; font-size:8pt; font-weight:700; letter-spacing:.04em;
+          padding: 2px 9px; border-radius: 999px; vertical-align: middle; }
+  code, .mono { font-family: "SF Mono", Consolas, monospace; font-size: 9pt; background: #eef2f6; padding: 1px 5px; border-radius: 4px; color: #0b3d63; }
+  .example { font-family: "SF Mono", Consolas, monospace; font-size: 8.8pt; background: #0b2740; color: #e8f0f7;
+             padding: 6px 10px; border-radius: 6px; margin: 5px 0; line-height: 1.45; }
+  .example .u { color: #8fd0ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.4pt; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--navy); color: #fff; font-size: 8.5pt; letter-spacing: .03em; text-transform: uppercase; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .filemap td:first-child { font-family:"SF Mono",Consolas,monospace; font-size:8.6pt; white-space:nowrap; color:#0b3d63; }
+  .qref { background: var(--navy); color:#eaf2f9; border-radius: 10px; padding: 16px 20px; break-inside: avoid; }
+  .qref h2 { color:#fff; border-color: rgba(255,255,255,.3); margin-top:0; }
+  .qref ol.steps > li::before { background:#fff; color: var(--navy); }
+  .qref a, .qref strong, .qref code { color:#fff; }
+  .qref code { background: rgba(255,255,255,.14); }
+
+  .foot { margin-top: 26px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 8.4pt; color: var(--muted); }
+  .page-break { break-before: page; }
+  .nowrap { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">Henry Ford Pathology · Transfusion Medicine</div>
+  <h1>Hosting &amp; Maintaining the Resident<br>Reference Dashboard</h1>
+  <p class="sub">A step-by-step guide — no coding required</p>
+  <div class="cover-meta">
+    Prepared for <strong>Dr. Rachel Brancamp</strong>, Associate Director, Transfusion Medicine.<br>
+    Goal: put the dashboard on <strong>your own</strong> GitHub, publish it as a live link for residents, and update it going
+    forward by simply <strong>describing changes in plain English</strong> to Claude Code. Everything below is done in a web browser.
+  </div>
+</div>
+
+<p class="lead">The dashboard is a <strong>self-contained website</strong> (a set of files). GitHub stores those files for free and
+publishes them as a live web page (a feature called <strong>GitHub Pages</strong>). You will do three things, once:
+<strong>(A)</strong> copy the files to your GitHub, <strong>(B)</strong> publish them, and <strong>(C)</strong> connect
+Claude Code so you can maintain it anytime. Plan about <strong>30 minutes</strong> for the one-time setup.</p>
+
+<div class="box accent">
+  <h4>What you'll have at the end</h4>
+  <ul>
+    <li>Your own free <strong>GitHub</strong> account with your own copy of the dashboard.</li>
+    <li>A live link — <code>https://YOUR-NAME.github.io/…</code> — to share with residents.</li>
+    <li><strong>Claude Code</strong> connected to it, so you can update content by typing a request in plain English.</li>
+    <li>Full independence — it runs under your account and does not depend on anyone else.</li>
+  </ul>
+</div>
+
+<div class="box">
+  <h4>Before you begin — a quick checklist</h4>
+  <ul>
+    <li>A computer with a web browser (Mac or Windows). Nothing to install.</li>
+    <li>A <strong>GitHub</strong> account — free (created in Part A).</li>
+    <li>A <strong>Claude Pro</strong> subscription — about <strong>$20/month</strong>, which includes Claude Code (set up in Part B). GitHub and hosting are free.</li>
+    <li>The source dashboard link: <a>https://github.com/omarzbaba/transfusion-medicine-resident-reference</a></li>
+  </ul>
+</div>
+
+<h2>Part A · Put the dashboard on your GitHub <span class="pill">one-time</span></h2>
+
+<h3>A1. Create a free GitHub account</h3>
+<ol class="steps">
+  <li>Go to <a>github.com</a> and click <strong>Sign up</strong>.</li>
+  <li>Enter <strong>your</strong> email, a password, and a <strong>username</strong>. <em>(The username becomes part of your web address — pick something clean, e.g. <code>brancamp-tm</code> or <code>hfpath</code>.)</em></li>
+  <li>Verify your email. Done. <em>(Already have an account? Skip to A2.)</em></li>
+</ol>
+
+<h3>A2. Make your own copy ("Fork")</h3>
+<ol class="steps">
+  <li>Signed in to GitHub, open the source project:<br><a>https://github.com/omarzbaba/transfusion-medicine-resident-reference</a></li>
+  <li>Click the <strong>Fork</strong> button (top-right), then <strong>Create fork</strong>.</li>
+  <li>GitHub copies everything into <strong>your</strong> account. This copy is yours and independent.</li>
+</ol>
+<div class="box tip"><h4>Even simpler alternative</h4>Omar can add you as a <strong>collaborator</strong> or <strong>transfer</strong> the
+repository to you directly — then it is already in your account and you can skip the fork. Either way works.</div>
+
+<h3>A3. Turn on the free live website (GitHub Pages)</h3>
+<ol class="steps">
+  <li>In <strong>your</strong> copy of the repository, click the <strong>Settings</strong> tab.</li>
+  <li>In the left menu, click <strong>Pages</strong>.</li>
+  <li>Under <strong>Source</strong>, choose <strong>Deploy from a branch</strong>; set branch to <strong>main</strong> and folder to <strong>/ (root)</strong>; click <strong>Save</strong>.</li>
+  <li>Wait ~1 minute and refresh. Your live link appears at the top: <code>https://YOUR-USERNAME.github.io/transfusion-medicine-resident-reference/</code></li>
+</ol>
+
+<h3>A4. Share it</h3>
+<p>Send residents that link. It works on any browser or phone, with no login. That's the hosting done — now let's make it easy to <em>maintain.</em></p>
+
+<div class="page-break"></div>
+
+<h2>Part B · Connect Claude Code <span class="pill">one-time · ~10 min</span></h2>
+
+<p class="lead">Claude Code lets you change the dashboard by describing what you want — it edits the files and saves them back to GitHub for you. The easiest version runs <strong>in your browser</strong> (nothing to install).</p>
+
+<h3>B1. Get a Claude subscription</h3>
+<ol class="steps">
+  <li>Go to <a>claude.com/pricing</a> and choose <strong>Claude Pro</strong> (~$20/month — plenty for maintaining this dashboard).</li>
+  <li>Sign up with <strong>your</strong> email and complete payment.</li>
+</ol>
+
+<h3>B2. Open Claude Code</h3>
+<ol class="steps">
+  <li>Go to <a>claude.ai/code</a> and sign in with your Claude account.</li>
+  <li><em>Prefer an installed app? You can instead download the <strong>Claude Code desktop app</strong> from the same page — the steps below are identical once you're signed in.</em></li>
+</ol>
+
+<h3>B3. Connect your GitHub</h3>
+<ol class="steps">
+  <li>On claude.ai/code you'll see <strong>"Connect GitHub."</strong> Click it.</li>
+  <li>Click <strong>Install Claude GitHub App</strong>. You're taken to GitHub.</li>
+  <li>Choose which repositories Claude may access — select your <strong>transfusion-medicine-resident-reference</strong> repo (or "all repositories"), then click <strong>Install</strong> to authorize.</li>
+</ol>
+<div class="box"><h4>What you just allowed</h4>You gave Claude permission to <strong>read</strong> your repository and to <strong>write</strong> changes (as new branches / pull requests) — nothing more. It cannot touch your computer, and it cannot delete your repository. You can revoke access anytime in GitHub → <span class="nowrap">Settings → Applications</span>.</div>
+
+<h3>B4. Create your workspace</h3>
+<ol class="steps">
+  <li>When prompted to <strong>"Create your environment,"</strong> give it a name (e.g., <em>TM Dashboard</em>).</li>
+  <li>Leave the other options at their defaults and click <strong>Create environment</strong>.</li>
+</ol>
+<p>That's the whole setup. From now on you just open claude.ai/code and go.</p>
+
+<h2>Part C · Update the dashboard, anytime</h2>
+
+<p class="lead">This is what you'll actually do day-to-day. No coding — you describe the change in plain English.</p>
+
+<ol class="steps">
+  <li>Go to <a>claude.ai/code</a> and select your <strong>TM Dashboard</strong> repository.</li>
+  <li>In the message box, <strong>type what you want changed</strong> (see examples below) and press Enter.</li>
+  <li>Claude reads the files, makes the change, and shows you a <strong>before/after preview</strong>. Approve with <strong>✓ Accept</strong> (or click <strong>Explain first</strong> to see what it will do).</li>
+  <li>Click <strong>Create PR</strong> (pull request) to save the change to GitHub.</li>
+  <li>On GitHub, open the pull request, review the highlighted changes, and click <strong>Merge</strong>.</li>
+  <li>Your live site updates automatically in <strong>1–2 minutes</strong>. Refresh to see it.</li>
+</ol>
+
+<div class="box accent">
+  <h4>Example requests — tailored to this dashboard</h4>
+  <div class="example"><span class="u">You:</span> In the Platelet requests tool, change the prophylactic threshold guidance from "under 10" to "under 20."</div>
+  <div class="example"><span class="u">You:</span> Update the MSBOS: change the crossmatch units for "Craniotomy" to 4, and add a new procedure "Robotic prostatectomy — Type &amp; Screen."</div>
+  <div class="example"><span class="u">You:</span> Add three new quiz questions about telling TACO apart from TRALI, with explanations.</div>
+  <div class="example"><span class="u">You:</span> Update the ASFA entry for "Thrombotic thrombocytopenic purpura" to reflect the latest edition.</div>
+  <div class="example"><span class="u">You:</span> Change the welcome text on the Start Here page, and add our blood bank pager number to the footer.</div>
+  <div class="example"><span class="u">You:</span> Show me how the platelet tool decides "appropriate" vs "not indicated" before I change anything.</div>
+</div>
+
+<h3>Where the content lives (in case you're curious)</h3>
+<table class="filemap">
+  <tr><th>File</th><th>What it holds</th></tr>
+  <tr><td>index.html</td><td>All the teaching content, wording, and quiz questions — the page itself.</td></tr>
+  <tr><td>assets/reference/refdata.js</td><td><strong>The clinical reference data</strong> — the MSBOS surgery list, ASFA table, platelet &amp; transfusion-reaction rules, reaction catalog.</td></tr>
+  <tr><td>assets/reference/abo.data.js</td><td>ABO donor prevalences used by the blood-prep donor-pool math.</td></tr>
+  <tr><td>assets/reference/*.js (others)</td><td>The tool logic and screens — usually no need to touch these.</td></tr>
+</table>
+<p>You don't need to open these yourself — just tell Claude what you want and it will find the right place. But it helps to know the <span class="mono">refdata.js</span> and <span class="mono">abo.data.js</span> files are the <em>clinical knowledge.</em></p>
+
+<div class="box warn">
+  <h4>⚠ Clinical &amp; safety notes</h4>
+  <ul>
+    <li><strong>Review clinical changes with the blood bank</strong> before residents rely on them — the MSBOS is your institutional policy (HFHS <code>PCR-PALM-TRM-5.050</code>); ASFA follows the 9th ed. (2023).</li>
+    <li>Every change waits for your <strong>approval</strong> and goes to a <strong>separate branch</strong> first — nothing changes the live site until <em>you</em> merge. You can always revert.</li>
+    <li>Do <strong>not</strong> paste passwords or any patient information into Claude.</li>
+    <li>The tool is decision <strong>support</strong>, not a protocol — the attending / blood bank physician is the final decision-maker (this is stated in the dashboard footer).</li>
+  </ul>
+</div>
+
+<h2>Cost &amp; troubleshooting</h2>
+<table>
+  <tr><th>Item</th><th>Cost</th></tr>
+  <tr><td>GitHub account + GitHub Pages hosting</td><td>Free</td></tr>
+  <tr><td>Claude Pro (includes Claude Code)</td><td>~$20 / month</td></tr>
+  <tr><td>Custom web address (optional)</td><td>$0–15 / year</td></tr>
+</table>
+<table>
+  <tr><th>If this happens…</th><th>Do this</th></tr>
+  <tr><td>Live link shows <strong>404 / not found</strong></td><td>Wait 1–2 min after enabling Pages; confirm Settings → Pages → Source is <strong>main / root</strong>; the main file must be named exactly <code>index.html</code>.</td></tr>
+  <tr><td>A reference <strong>tab is blank</strong></td><td>The <code>assets</code> folder didn't copy. In a fork this won't happen; if you uploaded manually, re-upload including the whole <code>assets</code> folder.</td></tr>
+  <tr><td>A <strong>change isn't showing</strong></td><td>Give Pages ~2 min, then hard-refresh: <strong>Cmd/Ctrl + Shift + R</strong>.</td></tr>
+  <tr><td>Claude shows <strong>no repositories</strong></td><td>GitHub → Settings → Applications → Claude → <strong>Configure</strong>, and make sure your repo is listed under "Repository access."</td></tr>
+  <tr><td>A change <strong>looks wrong</strong></td><td>Don't merge it. Go back to claude.ai/code and say what should be different — or, if already merged, open the pull request on GitHub and click <strong>Revert</strong>.</td></tr>
+</table>
+
+<div class="qref">
+  <h2>Quick reference — your typical update</h2>
+  <ol class="steps">
+    <li>Open <strong>claude.ai/code</strong> → pick your dashboard repo.</li>
+    <li>Type the change you want, in plain English → Enter.</li>
+    <li>Review the preview → <strong>✓ Accept</strong> → <strong>Create PR</strong>.</li>
+    <li>On GitHub, review and <strong>Merge</strong>.</li>
+    <li>Live site updates in 1–2 minutes. Done.</li>
+  </ol>
+</div>
+
+<div class="foot">
+  <strong>Transfusion Medicine &amp; Blood Bank — Resident Reference.</strong> Henry Ford Pathology Residency.<br>
+  Created by Omar Z. Baba, MD · Supervised by Rachel Brancamp, MD, MPA · Department of Pathology &amp; Laboratory Medicine, Henry Ford Health.<br>
+  For quick text edits you can also skip Claude Code entirely and edit a file directly on GitHub (open the file → pencil icon → Commit). Claude Code shines for larger or clinical-content changes.
+</div>
+
+</body>
+</html>
