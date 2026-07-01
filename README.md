@@ -54,3 +54,7 @@ Clinical data lives in `assets/reference/refdata.js` (`window.TMREF` — `bloodp
 ## Deploy
 
 **Live (reference copy):** https://omarzbaba.github.io/transfusion-medicine-resident-reference/ — public GitHub Pages (`main` / root). To run your own independent copy, follow [`HANDOFF.md`](HANDOFF.md).
+
+## Credits
+
+Created by **Omar Baba** · Supervised by **Dr. Brancamp** · Henry Ford Pathology Residency.
