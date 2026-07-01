@@ -242,7 +242,26 @@
   function renderAsfa(mount) {
     var ind = REF.asfaInd || {}, proto = (REF.asfaProto || {}).protocols || {};
     var indications = ind.indications || [], catDefs = ind.category_defs || {}, gradeDefs = ind.grade_defs || {};
-    var state = { q: "", cat: "" };
+    var state = { q: "", cat: "", sys: "" };
+
+    // Organ/body-system classification (regex on the disease name) so indications
+    // can be filtered by system as well as by ASFA category.
+    var ASFA_SYS = [
+      ["Neurologic", /encephal|myelitis|demyelinat|neuropath|neuritis|myasthen|guillain|cidp|sclerosis|neuromyelitis|pandas|rasmussen|stiff.person|lambert|chorea|paraprotein|cns|n-methyl|nmda|autoimmune enceph|polyradiculo|sydenham/i],
+      ["Renal / GU", /renal|kidney|nephr|goodpasture|anti-gbm|glomerul|fsgs|hemolytic urem|\bhus\b|atyp.*hus|dialysis|focal segmental/i],
+      ["Hematologic", /thrombotic|\bttp\b|thrombocytopenia|sickle|hyperviscos|hyperleuko|polycythemia|cryoglobulin|cold agglutin|hemolytic|aplastic|red cell|coagulation|microangiopath|\bhsct\b|hematopoietic|platelet|heparin|\bhit\b|waldenstrom|gammopath|myeloma|leukemia|erythrocyt|pure red/i],
+      ["Rheum / Autoimmune", /lupus|\bsle\b|vasculitis|scleroderma|antiphospholipid|dermatomyositis|polymyositis|rheumatoid|behcet|sjogren|systemic sclerosis|iga vasculit|catastrophic/i],
+      ["Dermatologic", /pemphig|dermatitis|psoriasis|scleromyxedema|toxic epidermal|cutaneous|\bctcl\b|epidermal necrolysis|atopic/i],
+      ["Transplant / Cardiac", /transplant|rejection|desensitiz|cardiomyopath|cardiac|\bheart\b|\blung\b|graft/i],
+      ["Metabolic / Lipid", /wilson|hypercholesterol|lipoprotein|refsum|phytanic|fabry|triglycerid|storage disease|familial/i],
+      ["Infectious / Toxin", /sepsis|malaria|babesios|toxin|venom|poison|mushroom|infection|\bhiv\b/i],
+      ["Endocrine", /thyroid|graves|thyrotox|diabet|hashimoto/i],
+      ["Ophthalmic", /macular|retinopath|uveitis|optic/i],
+      ["Hepatic / GI", /liver|hepatic|bowel|crohn|colitis|pancreatit|fulminant/i],
+      ["Obstetric", /pregnan|hemolytic disease|maternal|rhd allo/i]
+    ];
+    function asfaSystem(disease) { var d = disease || ""; for (var i = 0; i < ASFA_SYS.length; i++) if (ASFA_SYS[i][1].test(d)) return ASFA_SYS[i][0]; return "Other"; }
+    var systems = []; (function () { var seen = {}; indications.forEach(function (r) { var s = asfaSystem(r.disease); if (!seen[s]) { seen[s] = 1; systems.push(s); } }); systems.sort(function (a, b) { return a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b); }); })();
 
     var box = el("div", {});
     var legend = el("details", { class: "acc", style: "margin-bottom:14px" },
@@ -252,15 +271,21 @@
     Object.keys(gradeDefs).forEach(function (k) { lbody.appendChild(el("p", { class: "muted-note" }, el("strong", {}, "Grade " + k + ": "), gradeDefs[k])); });
     legend.appendChild(lbody); box.appendChild(legend);
 
-    var tools = el("div", { class: "quiz-toolbar" });
-    var chips = el("div", { class: "filter-chips" });
+    var tools = el("div", {});
+    var count = el("span", { class: "muted-note", style: "display:block; margin-top:8px" });
+    var catRow = el("div", { class: "filter-chips" }, el("span", { class: "muted-note", style: "margin-right:4px; align-self:center" }, "Category:"));
     [{ v: "", l: "All" }, { v: "I", l: "I" }, { v: "II", l: "II" }, { v: "III", l: "III" }, { v: "IV", l: "IV" }].forEach(function (c) {
       var b = el("button", { class: "chip" + (c.v === state.cat ? " is-active" : ""), type: "button",
-        on: { click: function () { state.cat = c.v; chips.querySelectorAll(".chip").forEach(function (x) { x.classList.remove("is-active"); }); b.classList.add("is-active"); draw(); } } }, c.l);
-      chips.appendChild(b);
+        on: { click: function () { state.cat = c.v; catRow.querySelectorAll(".chip").forEach(function (x) { x.classList.remove("is-active"); }); b.classList.add("is-active"); draw(); } } }, c.l);
+      catRow.appendChild(b);
     });
-    var count = el("span", { class: "muted-note", style: "margin-left:auto" });
-    tools.appendChild(chips); tools.appendChild(count);
+    var sysRow = el("div", { class: "filter-chips", style: "margin-top:6px" }, el("span", { class: "muted-note", style: "margin-right:4px; align-self:center" }, "System:"));
+    [{ v: "", l: "All" }].concat(systems.map(function (s) { return { v: s, l: s }; })).forEach(function (c) {
+      var b = el("button", { class: "chip" + (c.v === state.sys ? " is-active" : ""), type: "button",
+        on: { click: function () { state.sys = c.v; sysRow.querySelectorAll(".chip").forEach(function (x) { x.classList.remove("is-active"); }); b.classList.add("is-active"); draw(); } } }, c.l);
+      sysRow.appendChild(b);
+    });
+    tools.appendChild(catRow); tools.appendChild(sysRow); tools.appendChild(count);
     var searchWrap = el("div", { class: "search", style: "margin-bottom:12px" }, el("span", { class: "muted-note", text: "Search" }));
     var input = el("input", { type: "search", placeholder: "Search disease, indication, or procedure — TTP, Guillain-Barré, TPE…", "aria-label": "Search ASFA indications" });
     searchWrap.appendChild(input);
@@ -279,13 +304,14 @@
       var q = state.q;
       var rows = indications.filter(function (r) {
         if (state.cat && r.category !== state.cat) return false;
+        if (state.sys && asfaSystem(r.disease) !== state.sys) return false;
         if (q && (r.disease + " " + (r.indication || "") + " " + r.procedure).toLowerCase().indexOf(q) === -1) return false;
         return true;
       });
       count.textContent = rows.length + " indication(s)";
       rows.forEach(function (r) {
         var tr = el("tr", { class: "asfa-row" });
-        tr.appendChild(el("td", {}, r.disease));
+        tr.appendChild(el("td", {}, el("div", {}, r.disease), el("div", { class: "muted-note", style: "font-size:.8em" }, asfaSystem(r.disease))));
         tr.appendChild(el("td", {}, r.indication || "—"));
         tr.appendChild(el("td", {}, r.procedure));
         tr.appendChild(el("td", {}, el("span", { class: "asfa-cat cat-" + r.category, title: catDefs[r.category] || "" }, r.category)));

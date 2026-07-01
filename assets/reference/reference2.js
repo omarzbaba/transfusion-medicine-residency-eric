@@ -109,6 +109,7 @@
     /* --- antibodies --- */
     var abCard = el("div", { class: "surface ref-card" }, el("h4", {}, "Known alloantibodies"),
       el("p", { class: "muted-note", style: "margin-bottom:6px" }, "Select any identified antibodies — the tool computes antigen-negative requirements and donor screening burden."));
+    abCard.appendChild(rhLinkageNote());
     var systems = {};
     antigens.forEach(function (a) { (systems[a.system] = systems[a.system] || []).push(a); });
     Object.keys(systems).forEach(function (sys) {
@@ -156,6 +157,32 @@
     function listSec(title, items, cls) {
       var s = el("div", { class: "ref-sec" + (cls ? " " + cls : "") }, el("h5", {}, title));
       var ul = el("ul", { class: "ref-list" }); items.forEach(function (it) { ul.appendChild(el("li", {}, it)); }); s.appendChild(ul); return s;
+    }
+    /* Always-available explainer: why multiple Rh antibodies use haplotype linkage
+       rather than multiplying the single-antigen (marginal) frequencies. */
+    function rhLinkageNote() {
+      var d = el("details", { class: "acc", style: "margin:2px 0 4px" },
+        el("summary", {}, "🧬 Why Rh uses haplotype linkage — not multiplied single-antigen rates", el("span", { class: "chev" })));
+      var b = el("div", { class: "acc-body" });
+      b.appendChild(el("p", {}, "The Rh antigens D, C, c, E, e are carried on two tightly linked genes (",
+        el("em", {}, "RHD"), " + ", el("em", {}, "RHCE"), ") inherited together as a ", el("strong", {}, "haplotype"),
+        " (Fisher–Race gene complex) — so their single-antigen frequencies are ", el("strong", {}, "not"), " independent."));
+      b.appendChild(el("p", {}, el("strong", {}, "Haplotypes (antigens carried): "),
+        "R⁰ Dce · R¹ DCe · R² DcE · Rᶻ DCE · r dce · r′ dCe · r″ dcE · rʸ dCE. Someone negative for an antigen carries ",
+        el("em", {}, "no"), " haplotype bearing it."));
+      b.appendChild(el("p", {}, el("strong", {}, "How the tool computes it: "),
+        "for a patient with ≥ 2 Rh antibodies it sums the frequencies of the haplotypes that lack ", el("em", {}, "all"),
+        " target antigens, then squares that sum — Hardy–Weinberg, the chance of inheriting an antigen-negative haplotype from ",
+        el("em", {}, "both"), " parents. Kell, Duffy, Kidd and ABO are separate loci, so those ", el("em", {}, "do"), " multiply."));
+      b.appendChild(el("p", { class: "muted-note" }, el("strong", {}, "Worked example — anti-D + anti-C (White donors): "),
+        "only r (dce) and r″ (dcE) lack both D and C, so (≈0.37 + ≈0.01)² ≈ ", el("strong", {}, "14%"),
+        " of donors are D-negative and C-negative. Multiplying the marginals (≈15% D-negative × ≈31% C-negative ≈ ",
+        el("strong", {}, "5%"), ") badly under-counts them — because D and C are usually co-inherited, lacking both is commoner than independence predicts."));
+      b.appendChild(el("p", { class: "muted-note" },
+        "Frequencies are standardized on the White donor pool (the predominant local inventory); ABO compatibility is layered on as an independent factor. Sources: Fisher–Race & Sanger; Harmening, ",
+        el("em", {}, "Modern Blood Banking"), "; Reid & Lomas-Francis, ", el("em", {}, "Blood Group Antigen FactsBook"), "; AABB Technical Manual."));
+      d.appendChild(b);
+      return d;
     }
     run();
   }
