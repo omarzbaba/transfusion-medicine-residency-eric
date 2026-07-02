@@ -6,6 +6,11 @@
 <meta name="color-scheme" content="light dark" />
 <meta name="description" content="Transfusion medicine & blood bank onboarding and clinical decision-support reference for pathology residents — Henry Ford Pathology Residency." />
 <title>Blood Bank &amp; Transfusion Medicine — Resident Reference</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3S6 9.4 6 13.5a6 6 0 0 0 12 0C18 9.4 12 3 12 3Z' fill='%230b5cad'/%3E%3C/svg%3E" />
+<meta name="theme-color" content="#0b3d63" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Blood Bank &amp; Transfusion Medicine — Resident Reference" />
+<meta property="og:description" content="Henry Ford Pathology Residency — onboarding plus interactive decision-support tools: MSBOS blood-prep, ASFA, platelet approval, transfusion reactions, antibody ID, and apheresis." />
 <script>/* set theme before paint to avoid flash */(function(){try{var t=localStorage.getItem('tm-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <style id="css">
 /* ============================================================
@@ -599,6 +604,12 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
 .ref-toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:var(--text); color:var(--bg); padding:10px 18px; border-radius:10px; font-size:.85rem; font-weight:550; opacity:0; transition:opacity .25s var(--ease), transform .25s var(--ease); z-index:200; box-shadow:var(--shadow-lg) }
 .ref-toast.in{ opacity:1; transform:translateX(-50%) translateY(0) }
 .ref-toast.err{ background:var(--bad); color:#fff }
+.ref-errcard{ border:1px solid var(--bad); border-left:4px solid var(--bad); border-radius:var(--radius); padding:16px 18px; background:color-mix(in srgb,var(--bad) 7%, var(--surface)) }
+.ref-errcard strong{ color:var(--bad) } .ref-errcard p{ font-size:.86rem; color:var(--muted); margin-top:5px; line-height:1.5 }
+.ref-banner{ max-width:var(--maxw); margin:14px auto 0; padding:12px 16px; border-radius:10px; border:1px solid var(--warn); border-left:4px solid var(--warn); background:color-mix(in srgb,var(--warn) 10%, var(--surface)); font-size:.88rem; line-height:1.5 }
+.ref-banner strong{ color:var(--warn) }
+.ref-fallback{ padding:14px 0; color:var(--faint) }
+.foot-review{ font-size:.8rem; color:var(--muted) }
 
 @media (max-width:920px){
   .ref-grid{ grid-template-columns:1fr }
@@ -608,6 +619,7 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
 </style>
 </head>
 <body>
+<noscript><div style="padding:14px 18px;background:#fde8e8;color:#8a1c1c;font:15px/1.5 -apple-system,Segoe UI,sans-serif;text-align:center">This dashboard needs <strong>JavaScript</strong> enabled to run the interactive tools. Please enable JavaScript and reload the page.</div></noscript>
 <div class="scroll-progress" aria-hidden="true"><span id="scrollbar"></span></div>
 <a class="skip-link" href="#main">Skip to content</a>
 
@@ -1108,7 +1120,7 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
         <h2 id="platelet-h">Platelet request — approval &amp; appropriateness</h2>
         <p class="section-sub">The call you’ll field constantly. Set the indication and clinical setting, click the platelet band, and the engine checks it against standard AABB / BSH thresholds and writes an approve / not-indicated note you can copy.</p>
       </div>
-      <div id="ref-platelet" class="reveal"></div>
+      <div id="ref-platelet" class="reveal"><p class="ref-fallback muted-note">Loading the tool…</p></div>
     </section>
 
     <section id="txnreact" class="section" data-section="Transfusion reactions" aria-labelledby="txnreact-h">
@@ -1117,9 +1129,9 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
         <h2 id="txnreact-h">Transfusion reaction — workup &amp; management</h2>
         <p class="section-sub">Click the clinical signs and the clerical / DAT / ABO workup; the engine triages AHTR · FNHTR · TACO · TRALI · allergic · septic · delayed and lists the next steps. Below it, a searchable catalog of all reaction types.</p>
       </div>
-      <div id="ref-txnreact" class="reveal"></div>
+      <div id="ref-txnreact" class="reveal"><p class="ref-fallback muted-note">Loading the tool…</p></div>
       <h3 class="mt24 reveal">Reaction reference catalog</h3>
-      <div id="ref-txncatalog" class="reveal"></div>
+      <div id="ref-txncatalog" class="reveal"><p class="ref-fallback muted-note">Loading the tool…</p></div>
     </section>
 
     <section id="asfa" class="section" data-section="ASFA guidelines" aria-labelledby="asfa-h">
@@ -1128,7 +1140,7 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
         <h2 id="asfa-h">ASFA apheresis indications (9th ed., 2023)</h2>
         <p class="section-sub">All 166 indications — searchable by disease, indication, or procedure, filterable by category. Click any row for the prescription details: volume treated, replacement fluid, frequency, and course.</p>
       </div>
-      <div id="ref-asfa" class="reveal"></div>
+      <div id="ref-asfa" class="reveal"><p class="ref-fallback muted-note">Loading the tool…</p></div>
     </section>
 
     <section id="bloodprep" class="section" data-section="Blood for the OR" aria-labelledby="bloodprep-h">
@@ -1137,7 +1149,7 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
         <h2 id="bloodprep-h">Preparing blood for the OR (MSBOS)</h2>
         <p class="section-sub">Pick the procedure from the HFHS surgical blood ordering schedule, set the hemoglobin, and add any alloantibodies. The tool combines the MSBOS baseline, the transfusion-likelihood adjustment, and antigen-negative donor frequencies — linkage-aware for Rh — into a crossmatch recommendation and the donor-screening burden.</p>
       </div>
-      <div id="ref-bloodprep" class="reveal"></div>
+      <div id="ref-bloodprep" class="reveal"><p class="ref-fallback muted-note">Loading the tool…</p></div>
     </section>
 
     <section id="antibody" class="section" data-section="Antibody panel ID" aria-labelledby="antibody-h">
@@ -1146,7 +1158,7 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
         <h2 id="antibody-h">Antibody panel identification</h2>
         <p class="section-sub">A structured workup composer plus the quick method for reading a panel — rule of three, ruling out with homozygous cells, phase / strength, and the autocontrol.</p>
       </div>
-      <div id="ref-antibody" class="reveal"></div>
+      <div id="ref-antibody" class="reveal"><p class="ref-fallback muted-note">Loading the tool…</p></div>
     </section>
 
     <section id="aphtool" class="section" data-section="Therapeutic apheresis" aria-labelledby="aphtool-h">
@@ -1155,7 +1167,7 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
         <h2 id="aphtool-h">Therapeutic apheresis — consult &amp; note builder</h2>
         <p class="section-sub">Search the ASFA tables and it auto-fills the category, grade, procedure, and a suggested course; finish the prescription and monitoring, and copy a consult or progress note.</p>
       </div>
-      <div id="ref-apheresis" class="reveal"></div>
+      <div id="ref-apheresis" class="reveal"><p class="ref-fallback muted-note">Loading the tool…</p></div>
     </section>
 
     <!-- ===== CASE LAB ===== -->
@@ -1266,6 +1278,7 @@ textarea.ref-input{ resize:vertical; line-height:1.5 }
 
     <footer class="foot">
       <p><strong>Transfusion Medicine &amp; Blood Bank — Resident Reference.</strong> Henry Ford Pathology Residency.</p>
+      <p class="foot-review">Clinical content last reviewed <strong>June 2026</strong> · MSBOS: HFHS PCR-PALM-TRM-5.050 · ASFA 9th ed. (2023) · antigen frequencies: White donor population. Verify against current institutional policy before clinical use.</p>
       <div class="foot-credits">
         <div class="credit">
           <span class="credit-role">Created by</span>

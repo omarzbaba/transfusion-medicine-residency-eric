@@ -37,7 +37,7 @@
 
     var grid = el("div", { class: "ref-grid" });
     var controls = el("div", { class: "ref-controls" });
-    var result = el("div", { class: "ref-report surface" });
+    var result = el("div", { class: "ref-report surface", "aria-live": "polite" });
     grid.appendChild(controls); grid.appendChild(result);
     clear(mount); mount.appendChild(grid);
 
@@ -355,9 +355,13 @@
   }
 
   function boot() {
-    var b = document.getElementById("ref-bloodprep"); if (b && REF.bloodprep) renderBloodPrep(b);
-    var ab = document.getElementById("ref-antibody"); if (ab) renderAntibody(ab);
-    var ap = document.getElementById("ref-apheresis"); if (ap) renderApheresis(ap);
+    var mount = (RUI && RUI.safeMount) ? RUI.safeMount : function (id, fn) {
+      var m = document.getElementById(id); if (!m) return;
+      try { fn(m); } catch (e) { if (window.console && console.error) console.error(id, e); }
+    };
+    mount("ref-bloodprep", function (m) { if (REF.bloodprep) renderBloodPrep(m); });
+    mount("ref-antibody", function (m) { renderAntibody(m); });
+    mount("ref-apheresis", function (m) { renderApheresis(m); });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
 })();

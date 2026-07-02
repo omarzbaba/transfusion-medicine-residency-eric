@@ -85,7 +85,7 @@
       context[q.id] = (q.default != null) ? q.default : (q.type === "yesno" ? "unknown" : "");
     });
 
-    var report = el("div", { class: "ref-report surface" });
+    var report = el("div", { class: "ref-report surface", "aria-live": "polite" });
     var grid = el("div", { class: "ref-grid" });
     var controls = el("div", { class: "ref-controls" });
     grid.appendChild(controls); grid.appendChild(report);
@@ -337,15 +337,44 @@
     draw();
   }
 
-  /* boot the four tools defined in this file (the rest are in reference2.js) */
+  /* ---------------- resilience: fail visibly, never blankly ---------------- */
+  function errorCard(mount, msg) {
+    clear(mount);
+    mount.appendChild(el("div", { class: "ref-errcard", role: "alert" },
+      el("strong", {}, "This tool couldn’t load."),
+      el("p", {}, msg || "An unexpected error occurred while rendering this section."),
+      el("p", { class: "muted-note" }, "The rest of the page still works. If you just edited the reference data, undo that last change and reload.")));
+  }
+  function safeMount(id, fn) {
+    var mount = document.getElementById(id);
+    if (!mount) return;
+    try { fn(mount); }
+    catch (e) { errorCard(mount, (e && e.message) ? e.message : String(e)); if (window.console && console.error) console.error("[" + id + "]", e); }
+  }
+  var REQUIRED_KEYS = ["bloodprep", "asfaInd", "asfaProto", "txn", "plateletPanel", "tmPanel"];
+  function dataProblem() {
+    if (!window.TMREF) return "the reference data did not load (refdata.js)";
+    var missing = REQUIRED_KEYS.filter(function (k) { return !window.TMREF[k]; });
+    return missing.length ? "the reference data is incomplete — missing: " + missing.join(", ") : null;
+  }
+  function banner(msg) {
+    var host = document.getElementById("main") || document.body;
+    var b = el("div", { class: "ref-banner", role: "alert" },
+      el("strong", {}, "⚠ Reference data problem — "), msg + ".",
+      el("span", { class: "muted-note" }, " The teaching sections still work; the interactive tools are affected. Most often this means a recent edit to refdata.js has a typo (a missing comma or quote) — undo the last change and reload."));
+    if (host.firstChild) host.insertBefore(b, host.firstChild); else host.appendChild(b);
+  }
+
   function boot() {
-    if (!ENG) { console.error("TMENGINE missing"); return; }
-    var p = document.getElementById("ref-platelet"); if (p && REF.plateletPanel) renderPanel(p, REF.plateletPanel);
-    var t = document.getElementById("ref-txnreact"); if (t && REF.tmPanel) renderPanel(t, REF.tmPanel);
-    var tc = document.getElementById("ref-txncatalog"); if (tc) renderTxnCatalog(tc);
-    var a = document.getElementById("ref-asfa"); if (a) renderAsfa(a);
+    if (!ENG) { banner("the calculation engine did not load (engine.js)"); return; }
+    var problem = dataProblem();
+    if (problem) banner(problem);
+    safeMount("ref-platelet", function (m) { if (REF.plateletPanel) renderPanel(m, REF.plateletPanel); });
+    safeMount("ref-txnreact", function (m) { if (REF.tmPanel) renderPanel(m, REF.tmPanel); });
+    safeMount("ref-txncatalog", function (m) { renderTxnCatalog(m); });
+    safeMount("ref-asfa", function (m) { renderAsfa(m); });
   }
   window.TMREFUI = { el: el, append: append, clear: clear, debounce: debounce, toast: toast,
-    copyText: copyText, seg: seg, selectEl: selectEl, field: field };
+    copyText: copyText, seg: seg, selectEl: selectEl, field: field, safeMount: safeMount, errorCard: errorCard };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
 })();
